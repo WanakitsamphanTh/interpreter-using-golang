@@ -5,7 +5,7 @@ I'm currently studying formal languages and decided to build an interpreter for 
 - Implemented the tokenizer (scanner)
 - Implemented the parser using operator-precedence hierarchy
 - Implemented expression evaluation
-- Implementing syxtax & runtime error
+- Implementing syntax & runtime error
 - Implementing statement evaluation
 
 ## Expression Grammar

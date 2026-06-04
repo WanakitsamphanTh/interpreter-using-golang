@@ -6,13 +6,14 @@ import (
 )
 
 func run(str string) error {
+	env := NewEnvironment()
 	scanner := NewScanner(str)
 	tokens, err := scanner.scanTokens()
 	if err != nil {
 		return err
 	}
 	
-	parser := NewParser(tokens)
+	parser := NewParser(tokens, &env)
 	statements, err := parser.parse()
 	if err != nil {
 		return err

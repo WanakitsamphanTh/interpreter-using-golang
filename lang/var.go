@@ -1,0 +1,49 @@
+package lang
+
+// Var implements Statement
+type Var struct {
+	name Token
+	init Exp
+	env *Environment
+}
+
+func (v *Var) Execute() error {
+	if v.init != nil {
+		value := v.init.Eval()
+		v.env.Define(v.name, value)
+	}
+	return nil
+}
+
+//Variable implements Exp
+type Variable struct {
+	name Token
+	env *Environment
+}
+
+func (v *Variable) Eval() any {
+	return v.env.GetValue(v.name)
+}
+
+// Environment: mapping variables into variable statements (like Java)
+type Environment struct {
+	values map[string]any
+}
+
+func NewEnvironment() Environment {
+	var e Environment
+	e.values = make(map[string]any)
+	return e
+}
+
+func (e *Environment) Define(name Token, val any) {
+	e.values[name.Lexeme] = val
+}
+
+func (e *Environment) GetValue(name Token) any {
+	val, ok := e.values[name.Lexeme]
+	if !ok {
+		panic("Undefined variable " + name.Lexeme)
+	}
+	return val
+}

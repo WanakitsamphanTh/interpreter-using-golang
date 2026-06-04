@@ -5,19 +5,21 @@ import "fmt"
 type Parser struct {
 	tokens  []Token
 	current int
+	env *Environment
 }
 
-func NewParser(tokens []Token) *Parser {
+func NewParser(tokens []Token, env *Environment) *Parser {
 	return &Parser{
 		tokens: tokens,
 		current: 0,
+		env: env,
 	}
 }
 
 func (p *Parser) parse() ([]Statement, error) {
 	var statements []Statement
 	for !p.isAtEnd() {
-		stmt, err := p.statement()
+		stmt, err := p.declaration()
 		if err != nil {
 			return nil, err
 		}
@@ -27,8 +29,28 @@ func (p *Parser) parse() ([]Statement, error) {
 	return statements, nil
 }
 
+func (p *Parser) declaration() (Statement, error) {
+	if p.match(VAR) {
+		return p.varDecl()
+	}
+	return p.statement()
+}
+
 func (p *Parser) expression() (Exp, error) {
 	return p.equality()
+}
+
+func (p *Parser) varDecl() (Statement, error) {
+	name, err := p.consume(IDENTIFIER, "Expected variable name")
+	var init Exp
+	if p.match(EQUAL) {
+		init, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+	p.consume(SEMICOLON, "Expected ; after variable declaration.")
+	return &Var{name, init, p.env}, nil
 }
 
 func (p *Parser) statement() (Statement, error) {
@@ -162,6 +184,9 @@ func (p *Parser) primary() (Exp, error) {
 			return nil, err
 		}
 		return &GroupingExp{expr}, nil
+	}
+	if p.match(IDENTIFIER) {
+		return &Variable{p.previous(), p.env}, nil
 	}
 	return nil, raiseError(p.peek(), "Expect expression")
 }

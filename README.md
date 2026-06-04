@@ -27,10 +27,12 @@ I'm currently studying formal languages and decided to build an interpreter for 
 **primary** &rarr; literal | grouping \
 
 ## Syntax Grammar
-**program** &rarr; statement* EOF \
+**program** &rarr; declaration* EOF \
+**declaration** &rarr; varDecl | statement \
 **statement** &rarr; exprStmt | printStmt \
 **exprStmt** &rarr; expression `;` \
-**printStmt** &rarr; `print` expression `;` 
+**printStmt** &rarr; `print` expression `;`  \
+**varDecl** &rarr; `var` identifier (`=` expression)? `;`
 
 ## Reference
 *Crafting Interpreters* by Robert Nystrom 

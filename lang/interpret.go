@@ -13,13 +13,24 @@ func run(str string) error {
 	}
 	
 	parser := NewParser(tokens)
-	expr, err := parser.parse()
+	statements, err := parser.parse()
 	if err != nil {
 		return err
 	}
-	
-	fmt.Printf("%v\n", Parenthesize(expr))
-	fmt.Printf("%v\n", expr.Eval())
+	err = interpret(statements)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func interpret(statements []Statement) error {
+	for _, statement := range statements {
+		err := statement.Execute()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

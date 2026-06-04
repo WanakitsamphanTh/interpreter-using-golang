@@ -14,12 +14,46 @@ func NewParser(tokens []Token) *Parser {
 	}
 }
 
-func (p *Parser) parse() (Exp, error) {
-	return p.expression()
+func (p *Parser) parse() ([]Statement, error) {
+	var statements []Statement
+	for !p.isAtEnd() {
+		stmt, err := p.statement()
+		if err != nil {
+			return nil, err
+		}
+		statements = append(statements, stmt)
+	}
+
+	return statements, nil
 }
 
 func (p *Parser) expression() (Exp, error) {
 	return p.equality()
+}
+
+func (p *Parser) statement() (Statement, error) {
+	if p.match(PRINT) {
+		return p.newPrintStatement()
+	}
+	return p.newExpressionStatement()
+}
+
+func (p *Parser) newExpressionStatement() (Statement, error) {
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	p.consume(SEMICOLON, "Expected ; after expression.")
+	return NewExpressionStatement(expr), nil
+}
+
+func (p *Parser) newPrintStatement() (Statement, error) {
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	p.consume(SEMICOLON, "Expected ; after value.")
+	return NewPrintStatement(expr), nil
 }
 
 func (p *Parser) equality() (Exp, error) {
@@ -174,6 +208,7 @@ func (p *Parser) consume(tokenType Keyword, msg string) (Token, error) {
 	}
 	return p.peek(), raiseError(p.peek(), msg) // ?
 }
+
 
 func raiseError(token Token, msg string) error {
 	msg = fmt.Sprintf("%v : %v", token.Lexeme, msg)

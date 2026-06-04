@@ -8,7 +8,7 @@ I'm currently studying formal languages and decided to build an interpreter for 
 - Implementing syxtax & runtime error
 - Implementing statement evaluation
 
-## Grammar
+## Expression Grammar
 ***Types of expressions***
 **expression** &rarr; literal | unary | binary | grouping \
 **literal** &rarr; NUMBER | STRING | `true` | `false` | `nil` \
@@ -25,6 +25,12 @@ I'm currently studying formal languages and decided to build an interpreter for 
 **factor** &rarr; unary [(`*` | `/`) unary]* \
 **unary** &rarr; (`-`|`!`) unary | primary \
 **primary** &rarr; literal | grouping \
+
+## Syntax Grammar
+**program** &rarr; statement* EOF \
+**statement** &rarr; exprStmt | printStmt \
+**exprStmt** &rarr; expression `;` \
+**printStmt** &rarr; `print` expression `;` 
 
 ## Reference
 *Crafting Interpreters* by Robert Nystrom 

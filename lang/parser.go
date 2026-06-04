@@ -176,8 +176,6 @@ func (p *Parser) consume(tokenType Keyword, msg string) (Token, error) {
 }
 
 func raiseError(token Token, msg string) error {
-	if token.Type == EOF {
-		return fmt.Errorf("%v at end : %v", token.Line, msg)
-	} 
-	return fmt.Errorf("%v at %v : %v", token.Line, token.Lexeme, msg)
+	msg = fmt.Sprintf("%v : %v", token.Lexeme, msg)
+	return &SyntaxError{token.Line, msg}	
 }

@@ -1,5 +1,7 @@
 package lang
 
+import "fmt"
+
 type Exp interface {
 	Eval() any
 }
@@ -42,17 +44,21 @@ func (b BinaryExp) Eval() any {
 			}
 			return l + r
 		case string:
-			r, ok := right.(string)
+			/*r, ok := right.(string)
 			if !ok {
 				panic("Unable to convert variable to string")
 			}
-			return l + r
+			return l + r*/
+			return fmt.Sprintf("%s%v", l, right)
 		}
 	case MINUS:
 		return left.(float64) - right.(float64)
 	case STAR:
 		return left.(float64) * right.(float64)
 	case SLASH:
+		if right.(float64) == 0.0 {
+			panic("Can't divide by zero")
+		}
 		return left.(float64) / right.(float64)
 	case AND:
 		return left.(bool) && right.(bool)
@@ -65,6 +71,7 @@ func (b BinaryExp) Eval() any {
 	default:
 		panic("unknown operator")
 	}
+	return nil
 }
 
 

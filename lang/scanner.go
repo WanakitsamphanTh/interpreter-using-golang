@@ -43,7 +43,7 @@ func (s *Scanner) scanTokens() ([]Token, error) {
 			return nil, err
 		}
 	}
-	s.tokens = append(s.tokens, Token{Type: EOF, Lexeme: "", Literal: nil, Line: 0})
+	s.tokens = append(s.tokens, Token{Type: EOF, Lexeme: "", Literal: nil, Line: s.line})
 	return s.tokens, nil
 }
 
@@ -119,7 +119,7 @@ func (s *Scanner) scanToken() error {
 		} else if isAlpha(c) {
 			err = s.identifier()
 		} else {
-			err = fmt.Errorf("Unexpected character: %c", c)
+			err = &SyntaxError{s.line, fmt.Sprintf("Unexpected character: %c", c)}
 		}
 	}
 
@@ -175,8 +175,7 @@ func (s *Scanner) stringLiteral() error {
       s.advance();
     }
 	if s.isAtEnd() {
-		err := fmt.Errorf("Unterminated string.")
-		return err
+		return &SyntaxError{s.line, "Unterminated string."}
 	}
 	s.advance() // The closing ".
 	value := s.source[s.start+1 : s.current-1]
@@ -196,7 +195,7 @@ func (s *Scanner) parseNumber() error {
 	}
 	value, err := strconv.ParseFloat(s.source[s.start:s.current], 64)
 	if err != nil {
-		return fmt.Errorf("Invalid number: %s", s.source[s.start:s.current])
+		return &SyntaxError{s.line,fmt.Sprintf("Invalid number: %s", s.source[s.start:s.current])}
 	}
 	s.addToken(NUMBER, value)
 

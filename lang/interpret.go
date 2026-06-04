@@ -19,6 +19,7 @@ func run(str string) error {
 	}
 	
 	fmt.Printf("%v\n", Parenthesize(expr))
+	fmt.Printf("%v\n", expr.Eval())
 	return nil
 }
 
@@ -40,14 +41,14 @@ func RunREPL() error {
 		var input string
 		_, err := fmt.Scanln(&input)
 		if err != nil {
-			return err
+			fmt.Println("Error:", err.Error())
 		}
 		if input == "" {
 			break
 		}
 		err = run(input)
 		if err != nil {
-			fmt.Println("Error:", err)
+			fmt.Println("Error:", err.Error())
 		}
 	}
 	return nil

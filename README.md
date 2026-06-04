@@ -4,7 +4,9 @@ I'm currently studying formal languages and decided to build an interpreter for 
 **Milestones**
 - Implemented the tokenizer (scanner)
 - Implemented the parser using operator-precedence hierarchy
-- Implementing expression evaluation
+- Implemented expression evaluation
+- Implementing syxtax & runtime error
+- Implementing statement evaluation
 
 ## Grammar
 ***Types of expressions***

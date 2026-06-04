@@ -6,8 +6,8 @@ I'm currently studying formal languages and decided to build an interpreter for 
 - Implemented the parser using operator-precedence hierarchy
 - Implemented expression evaluation
 - Implemented variable declaration and referencing
+- Implemented expression statement & print statement execution
 - Implementing syntax & runtime error
-- Implementing statement evaluation
 
 ## Expression Grammar
 ***Types of expressions***

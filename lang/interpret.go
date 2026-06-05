@@ -18,8 +18,8 @@ func run(str string, env *Environment) error {
 	if err != nil {
 		return err
 	}
-	//ast := Parenthesize(statements)
-	//fmt.Println("Abstract Syntax Tree:\n", ast)
+	ast := Parenthesize(statements)
+	fmt.Println("Abstract Syntax Tree:\n", ast)
 	err = interpret(statements)
 	if err != nil {
 		return err

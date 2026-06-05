@@ -60,10 +60,6 @@ func (b BinaryExp) Eval() any {
 			panic("Can't divide by zero")
 		}
 		return left.(float64) / right.(float64)
-	case AND:
-		return left.(bool) && right.(bool)
-	case OR:
-		return left.(bool) || right.(bool)
 	case EQUAL_EQUAL:
 		return isEqual(left, right)
 	case BANG_EQUAL:
@@ -113,4 +109,23 @@ func isEqual(a any, b any) bool {
 		return false
 	}
 	return a == b
+}
+
+type LogicalExpression struct {
+	Op Token
+	left Exp
+	right Exp
+}
+
+func (l *LogicalExpression) Eval() any {
+	if l.Op.Type == OR {
+		if isTruthy(l.left.Eval()) {
+			return l.left
+		}
+	} else {
+		if !isTruthy(l.left.Eval()) {
+			return l.left
+		}
+	}
+	return l.right
 }

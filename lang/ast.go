@@ -11,7 +11,12 @@ func Parenthesize(node any) string {
 	case *GroupingExp:
 		return fmt.Sprintf("(group %s)", Parenthesize(n.Exp))
 	case *LiteralExp:
-		return fmt.Sprintf("%v", n.Value)
+		val, ok := n.Value.(string)
+		if ok {
+			return fmt.Sprintf("\"%v\"", val)
+		} else {
+			return fmt.Sprintf("%v", n.Value)
+		}
 	case *UnaryExp:
 		return fmt.Sprintf("(%s %s)", n.Op.Lexeme, Parenthesize(n.Right))
 	case *ExpressionStatement:
@@ -26,18 +31,22 @@ func Parenthesize(node any) string {
 		return fmt.Sprintf("(Var %s)", n.name.Lexeme)
 	case []Statement:
 		return fmt.Sprintf("(%s)", listOfStatementsString(n))
-	case Block:
+	case *Block:
 		return fmt.Sprintf("(%s)", listOfStatementsString(n.statements))
+	case *IfStatement:
+		return fmt.Sprintf("(If %s %s %s)", Parenthesize(n.condition), Parenthesize(n.thenBranch), Parenthesize(n.elseBranch))
+	case *WhileStatement:
+		return fmt.Sprintf("(While %s %s)", Parenthesize(n.condition), Parenthesize(n.body))
 	default:
-		return "Unknown expression type"
+		return fmt.Sprintf("(%T)", n)
 	}
 
 }
 
 func listOfStatementsString(statements []Statement) string{
-	str := "\n"
+	str := ""
 	for _, stmt := range statements {
-		str = fmt.Sprintf("%s  %s\n", str,Parenthesize(stmt))
+		str = str + Parenthesize(stmt)
 	}
 	return str + ""
 }

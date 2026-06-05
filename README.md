@@ -8,6 +8,7 @@ I'm currently studying formal languages and decided to build an interpreter for 
 - Implemented variable declaration and referencing
 - Implemented expression statement & print statement execution
 - Implemented scope
+- Implemented control flow (if-else and while)
 - Implementing syntax & runtime error
 
 ## Expression Grammar
@@ -28,14 +29,18 @@ I'm currently studying formal languages and decided to build an interpreter for 
 **factor** &rarr; unary [(`*` | `/`) unary]* \
 **unary** &rarr; (`-`|`!`) unary | primary \
 **primary** &rarr; literal | grouping \
+**logic_and** &rarr; equality [`and` equality]*
+**logic_or** &rarr; logic_and [`or` logic_and]*
 
 ## Syntax Grammar
 **program** &rarr; declaration* EOF \
-**declaration** &rarr; varDecl | statement \
-**statement** &rarr; exprStmt | printStmt | block \
+**declaration** &rarr; varDecl | funcDecl | statement \
+**statement** &rarr; exprStmt | printStmt | ifStmt | block \
 **exprStmt** &rarr; expression `;` \
 **printStmt** &rarr; `print` expression `;`  \
-**varDecl** &rarr; `var` identifier (`=` expression)? `;`
+**ifStmt** &rarr; `if` `(` expression `)` statement [`else` statement]? \
+**varDecl** &rarr; `var` identifier [`=` expression]? `;` \
+**funcDecl** &rarr; `func` identifier `(` [identifier [`,` identifier]* ]? `)` block \
 **block** &rarr; `{` statement* `}`
 
 ## Reference

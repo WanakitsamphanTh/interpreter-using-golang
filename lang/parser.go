@@ -29,6 +29,39 @@ func (p *Parser) parse() ([]Statement, error) {
 	return statements, nil
 }
 
+func (p *Parser) ifElse() (Statement, error) {
+	_, err := p.consume(LEFT_PAREN,  "Expect '(' after 'if'.")
+	if err != nil {
+		return nil, err
+	}
+
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	_, err = p.consume(RIGHT_PAREN,  "Expect ')' after condition.")
+	if err != nil {
+		return nil, err
+	}
+
+	var thenBranch Statement
+	var elseBranch Statement
+
+	thenBranch, err = p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.match(ELSE) {
+		elseBranch, err = p.statement()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &IfStatement{condition, thenBranch, elseBranch}, nil
+}
+
 func (p *Parser) declaration() (Statement, error) {
 	if p.match(VAR) {
 		return p.varDecl()
@@ -60,7 +93,31 @@ func (p *Parser) statement() (Statement, error) {
 	if p.match(LEFT_BRACE) {
 		return p.newBlock()
 	}
+	if p.match(IF) {
+		return p.ifElse()
+	}
+	if p.match(WHILE) {
+		return p.whileLoop()
+	}
 	return p.newExpressionStatement()
+}
+
+func (p *Parser) whileLoop() (Statement, error) {
+	_, err := p.consume(LEFT_PAREN,  "Expect '(' after 'while'.")
+	if err != nil {
+		return nil, err
+	}
+	cond, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	
+	_, err = p.consume(RIGHT_PAREN,  "Expect ')' after while condition.")
+	if err != nil {
+		return nil, err
+	}
+	body, err := p.statement()
+	return &WhileStatement{cond, body}, err
 }
 
 func (p *Parser) newBlock() (Statement, error) {
@@ -118,7 +175,7 @@ func (p *Parser) equality() (Exp, error) {
 }
 
 func (p *Parser) assignment() (Exp, error) {
-	expr, err := p.equality()
+	expr, err := p.or()
 	if err != nil {
 		return nil, err
 	}
@@ -187,6 +244,32 @@ func (p *Parser) factor() (Exp, error) {
 		expr = &BinaryExp{expr, op, right}
 	}
 
+	return expr, nil
+}
+
+func (p *Parser) or() (Exp, error) {
+	expr, err := p.and()
+	if err != nil {
+		return nil, err
+	}
+	for p.match(OR) {
+		op := p.previous()
+		right, err := p.and()
+		return &LogicalExpression{op, expr, right}, err
+	}
+	return expr, nil
+}
+
+func (p *Parser) and() (Exp, error) {
+	expr, err := p.equality()
+	if err != nil {
+		return nil, err
+	}
+	for p.match(AND) {
+		op := p.previous()
+		right, err := p.equality()
+		return &LogicalExpression{op, expr, right}, err
+	}
 	return expr, nil
 }
 

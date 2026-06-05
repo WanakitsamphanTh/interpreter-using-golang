@@ -11,7 +11,9 @@ func (v *Var) Execute() error {
 	if v.init != nil {
 		value := v.init.Eval()
 		v.env.Define(v.name, value)
+		return nil
 	}
+	v.env.Define(v.name, nil)
 	return nil
 }
 

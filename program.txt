@@ -1,26 +1,16 @@
-var x = 1;
-var y = 10;
-var z = x + y;
+var x;
+var y;
+var str;
 
-print "global: " + z;
+x = 1;
 
-{
-    var z = -10;
-    print "scope A: " + z;
+while(x != 10) {
+    y = 1;
+    str = "";
+    while(y != 10) {
+        str = str + "(" + x + "," + y + ") ";
+        y = y + 1;
+    }
+    print str;
+    x = x + 1;
 }
-
-print "global: " + z;
-
-{
-    var z = "string";
-    print "scope B: " + z;
-}
-
-print "global: " + z;
-
-{
-    z = 1 == 1;
-    print "scope C uses global z: " + z; 
-}
-
-print "global: " + z;

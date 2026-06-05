@@ -3,21 +3,23 @@ package lang
 import (
 	"fmt"
 	"os"
+	"bufio"
 )
 
-func run(str string) error {
-	env := NewEnvironment()
+func run(str string, env *Environment) error {
 	scanner := NewScanner(str)
 	tokens, err := scanner.scanTokens()
 	if err != nil {
 		return err
 	}
-	
-	parser := NewParser(tokens, &env)
+
+	parser := NewParser(tokens, env)
 	statements, err := parser.parse()
 	if err != nil {
 		return err
 	}
+	//ast := Parenthesize(statements)
+	//fmt.Println("Abstract Syntax Tree:\n", ast)
 	err = interpret(statements)
 	if err != nil {
 		return err
@@ -37,10 +39,11 @@ func interpret(statements []Statement) error {
 
 func RunScript(path string) error {
 	data, err := os.ReadFile(path)
+	env := NewEnvironment()
 	if err != nil {
 		return err
 	}
-	err = run(string(data))
+	err = run(string(data), &env)
 	if err != nil {
 		return err
 	}
@@ -48,17 +51,21 @@ func RunScript(path string) error {
 }
 
 func RunREPL() error {
+	env := NewEnvironment()
+	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("> ")
 		var input string
-		_, err := fmt.Scanln(&input)
-		if err != nil {
-			fmt.Println("Error:", err.Error())
-		}
+
+		scanner.Scan() 
+		input = scanner.Text()
+
 		if input == "" {
 			break
 		}
-		err = run(input)
+		
+		fmt.Println("Input: ", input)
+		err := run(input, &env)
 		if err != nil {
 			fmt.Println("Error:", err.Error())
 		}

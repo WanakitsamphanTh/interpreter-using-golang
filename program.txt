@@ -1,6 +1,26 @@
-print "Hello World";
-print "1 + 1 = " + 2;
-print "10 * 3 = " + (10 * 3);
+var x = 1;
+var y = 10;
+var z = x + y;
 
-var x = 100;
-print x;
+print "global: " + z;
+
+{
+    var z = -10;
+    print "scope A: " + z;
+}
+
+print "global: " + z;
+
+{
+    var z = "string";
+    print "scope B: " + z;
+}
+
+print "global: " + z;
+
+{
+    z = 1 == 1;
+    print "scope C uses global z: " + z; 
+}
+
+print "global: " + z;

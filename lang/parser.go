@@ -37,7 +37,7 @@ func (p *Parser) declaration() (Statement, error) {
 }
 
 func (p *Parser) expression() (Exp, error) {
-	return p.equality()
+	return p.assignment()
 }
 
 func (p *Parser) varDecl() (Statement, error) {
@@ -49,15 +49,36 @@ func (p *Parser) varDecl() (Statement, error) {
 			return nil, err
 		}
 	}
-	p.consume(SEMICOLON, "Expected ; after variable declaration.")
-	return &Var{name, init, p.env}, nil
+	_, err = p.consume(SEMICOLON, "Expected ; after variable declaration.")
+	return &Var{name, init, p.env}, err
 }
 
 func (p *Parser) statement() (Statement, error) {
 	if p.match(PRINT) {
 		return p.newPrintStatement()
 	}
+	if p.match(LEFT_BRACE) {
+		return p.newBlock()
+	}
 	return p.newExpressionStatement()
+}
+
+func (p *Parser) newBlock() (Statement, error) {
+	var statements []Statement
+	prev := p.env
+	current_env := NewNestedEnvironment(prev)
+	p.env = &current_env
+	for !p.check(RIGHT_BRACE) && !p.isAtEnd() {
+		statement, err :=  p.declaration()
+		if err != nil {
+			p.env = prev
+			return nil, err
+		}
+		statements = append(statements, statement)
+	}
+	_, err := p.consume(RIGHT_BRACE, "Expect '}' after block.");
+	p.env = prev
+	return NewBlock(statements, &current_env), err
 }
 
 func (p *Parser) newExpressionStatement() (Statement, error) {
@@ -65,8 +86,8 @@ func (p *Parser) newExpressionStatement() (Statement, error) {
 	if err != nil {
 		return nil, err
 	}
-	p.consume(SEMICOLON, "Expected ; after expression.")
-	return NewExpressionStatement(expr), nil
+	_, err = p.consume(SEMICOLON, "Expected ; after expression.")
+	return NewExpressionStatement(expr), err
 }
 
 func (p *Parser) newPrintStatement() (Statement, error) {
@@ -74,8 +95,8 @@ func (p *Parser) newPrintStatement() (Statement, error) {
 	if err != nil {
 		return nil, err
 	}
-	p.consume(SEMICOLON, "Expected ; after value.")
-	return NewPrintStatement(expr), nil
+	_, err = p.consume(SEMICOLON, "Expected ; after value.")
+	return NewPrintStatement(expr), err
 }
 
 func (p *Parser) equality() (Exp, error) {
@@ -93,6 +114,26 @@ func (p *Parser) equality() (Exp, error) {
 		expr = &BinaryExp{expr, op, right}
 	}
 
+	return expr, nil
+}
+
+func (p *Parser) assignment() (Exp, error) {
+	expr, err := p.equality()
+	if err != nil {
+		return nil, err
+	}
+	if p.match(EQUAL) {
+		equals := p.previous()
+		val, err := p.assignment()
+		if err != nil {
+			return nil, err
+		}
+		var_expr, ok := expr.(*Variable)
+		if !ok {
+			return nil, raiseError(equals, "Invalid assignment target")
+		}
+		return &Assignment{var_expr.name, val, p.env}, nil
+	}
 	return expr, nil
 }
 

@@ -7,6 +7,7 @@ I'm currently studying formal languages and decided to build an interpreter for 
 - Implemented expression evaluation
 - Implemented variable declaration and referencing
 - Implemented expression statement & print statement execution
+- Implemented scope
 - Implementing syntax & runtime error
 
 ## Expression Grammar
@@ -19,7 +20,8 @@ I'm currently studying formal languages and decided to build an interpreter for 
 **grouping** &rarr; `(` expression `)`
 
 ***Grammar of expressions in which the order of operations is applied.*** \
-**expression** &rarr; equality \
+**expression** &rarr; assignment \
+**assignment** &rarr; IDENTIFIER `=` assignment | equality \
 **equality** &rarr; comparison [(`==` | `!=`) comparison]* \
 **comparison** &rarr; term [(`>` | `>=` | `<` | `<=`) term]* \
 **term** &rarr; factor [(`+` | `-`) factor]* \
@@ -30,10 +32,11 @@ I'm currently studying formal languages and decided to build an interpreter for 
 ## Syntax Grammar
 **program** &rarr; declaration* EOF \
 **declaration** &rarr; varDecl | statement \
-**statement** &rarr; exprStmt | printStmt \
+**statement** &rarr; exprStmt | printStmt | block \
 **exprStmt** &rarr; expression `;` \
 **printStmt** &rarr; `print` expression `;`  \
 **varDecl** &rarr; `var` identifier (`=` expression)? `;`
+**block** &rarr; `{` statement* `}`
 
 ## Reference
 *Crafting Interpreters* by Robert Nystrom 

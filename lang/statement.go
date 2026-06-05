@@ -10,7 +10,7 @@ type PrintStatement struct {
 	expr Exp
 }
 
-func NewPrintStatement(expr Exp) *PrintStatement {
+func NewPrintStatement(expr Exp) Statement {
 	return &PrintStatement{expr}
 }
 
@@ -27,8 +27,8 @@ type ExpressionStatement struct {
 	expr Exp
 }
 
-func NewExpressionStatement(expr Exp) *PrintStatement {
-	return &PrintStatement{expr}
+func NewExpressionStatement(expr Exp) Statement {
+	return &ExpressionStatement{expr}
 }
 
 func (s *ExpressionStatement) Execute() error {

@@ -94,6 +94,7 @@ func (l LiteralExp) Eval() any {
 	return l.Value
 }
 
+
 // Miscellaneous
 
 func isTruthy(obj any) bool {

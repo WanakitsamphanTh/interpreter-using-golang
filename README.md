@@ -8,7 +8,7 @@ I'm currently studying formal languages and decided to build an interpreter for 
 - Implemented variable declaration and referencing
 - Implemented expression statement & print statement execution
 - Implemented scope
-- Implemented control flow (if-else and while)
+- Implemented control flow (if-else, while and for loop)
 - Implementing syntax & runtime error
 
 ## Expression Grammar
@@ -39,6 +39,8 @@ I'm currently studying formal languages and decided to build an interpreter for 
 **exprStmt** &rarr; expression `;` \
 **printStmt** &rarr; `print` expression `;`  \
 **ifStmt** &rarr; `if` `(` expression `)` statement [`else` statement]? \
+**forStmt** &rarr; `for` `(` [varDecl | exprStmt | `;`] exprStmt `;` expression? expression? `)` statement \
+**whileStmt** &rarr; `while` `(` expression `)` statement \
 **varDecl** &rarr; `var` identifier [`=` expression]? `;` \
 **funcDecl** &rarr; `func` identifier `(` [identifier [`,` identifier]* ]? `)` block \
 **block** &rarr; `{` statement* `}`

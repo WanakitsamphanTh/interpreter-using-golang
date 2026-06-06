@@ -99,7 +99,77 @@ func (p *Parser) statement() (Statement, error) {
 	if p.match(WHILE) {
 		return p.whileLoop()
 	}
+	if p.match(FOR) {
+		return p.forLoop()
+	}
 	return p.newExpressionStatement()
+}
+
+func (p *Parser) forLoop() (Statement, error) {
+	p.consume(LEFT_PAREN, "Expect '(' after 'for'.")
+	var init Statement
+	var err error
+
+	prev := p.env
+	current_env := NewNestedEnvironment(prev)
+	p.env = &current_env
+
+	if p.match(SEMICOLON){
+		init = nil
+	} else if p.match(VAR) {
+		init, err = p.varDecl()
+	} else {
+		init, err = p.newExpressionStatement()
+	}
+
+	if err != nil {
+		p.env = prev
+		return nil, err
+	}
+
+	var cond Exp
+    if !p.check(SEMICOLON) {
+      cond, err = p.expression()
+    }
+	if err != nil {
+		p.env = prev
+		return nil, err
+	}
+	p.consume(SEMICOLON, "Expect ';' after loop condition.")
+
+	var increment Exp
+	if !p.check(RIGHT_PAREN) {
+      increment, err = p.expression()
+    }
+	if err != nil {
+		p.env = prev
+		return nil, err
+	}
+	p.consume(RIGHT_PAREN, "Expect ')' after condition.")
+
+	body, err := p.statement()
+	if err != nil {
+		p.env = prev
+		return nil, err
+	}
+
+	if increment != nil {
+		incrementStmt := NewExpressionStatement(increment)
+		body = &Block{[]Statement{body, incrementStmt},&current_env}
+	}
+
+	if cond == nil {
+		cond = &LiteralExp{true}
+	}
+
+	body = &WhileStatement{cond,body}
+
+	if init != nil {
+		body = &Block{[]Statement{init, body},&current_env}
+	}
+
+	p.env = prev
+	return body, nil
 }
 
 func (p *Parser) whileLoop() (Statement, error) {
@@ -107,6 +177,7 @@ func (p *Parser) whileLoop() (Statement, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	cond, err := p.expression()
 	if err != nil {
 		return nil, err

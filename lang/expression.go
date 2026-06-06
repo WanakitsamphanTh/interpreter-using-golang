@@ -60,6 +60,14 @@ func (b BinaryExp) Eval() any {
 			panic("Can't divide by zero")
 		}
 		return left.(float64) / right.(float64)
+	case GREATER:
+		return left.(float64) > right.(float64)
+	case GREATER_EQUAL:
+		return left.(float64) >= right.(float64)
+	case LESS:
+		return left.(float64) < right.(float64)
+	case LESS_EQUAL:
+		return left.(float64) <= right.(float64)
 	case EQUAL_EQUAL:
 		return isEqual(left, right)
 	case BANG_EQUAL:

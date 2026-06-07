@@ -15,14 +15,14 @@ func NewEnvironment(enclosing *Environment) *Environment {
 	return &e
 }
 
-func (e *Environment) Define(name Token, val any) {
-	e.values[name.Lexeme] = val
+func (e *Environment) Define(name string, val any) {
+	e.values[name] = val
 }
 
-func (e *Environment) Assign(name Token, val any) error {
-	_, ok := e.values[name.Lexeme]
+func (e *Environment) Assign(name string, val any) error {
+	_, ok := e.values[name]
 	if ok {
-		e.values[name.Lexeme] = val
+		e.values[name] = val
 		return nil
 	}
 
@@ -33,17 +33,17 @@ func (e *Environment) Assign(name Token, val any) error {
 		}
 	}
 
-	return &RuntimeError{name, "Undefined variable"}
+	return fmt.Errorf("%s : Undefined variable", name)
 }
 
-func (e *Environment) GetValue(name Token) any {
-	val, ok := e.values[name.Lexeme]
+func (e *Environment) GetValue(name string) any {
+	val, ok := e.values[name]
 	if !ok {
 		if e.enclosing != nil {
 			val = e.enclosing.GetValue(name)
 			return val
 		}
-		panic("Undefined variable " + name.Lexeme)
+		panic("Undefined variable " + name)
 	}
 	return val
 }

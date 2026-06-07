@@ -8,10 +8,10 @@ type Var struct {
 func (v *Var) Execute() error {
 	if v.init != nil {
 		value := v.init.Eval()
-		current_env.Define(v.name, value)
+		current_env.Define(v.name.Lexeme, value)
 		return nil
 	}
-	current_env.Define(v.name, nil)
+	current_env.Define(v.name.Lexeme, nil)
 	return nil
 }
 
@@ -21,7 +21,7 @@ type Variable struct {
 }
 
 func (v *Variable) Eval() any {
-	return current_env.GetValue(v.name)
+	return current_env.GetValue(v.name.Lexeme)
 }
 
 // Assignment
@@ -32,6 +32,6 @@ type Assignment struct {
 
 func (a *Assignment) Eval() any {
 	val := a.val.Eval()
-	current_env.Assign(a.name, val)
+	current_env.Assign(a.name.Lexeme, val)
 	return val
 }

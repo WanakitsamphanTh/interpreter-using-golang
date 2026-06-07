@@ -21,8 +21,9 @@ func (f *Function) call(params []any) (any, error) {
 	NewNestedEnvironment()
 	defer RetractEnvironment()
 	for i, param := range f.decl.params {
-		current_env.Define(param, params[i])
+		current_env.Define(param.Lexeme, params[i])
 	}
+	f.decl.body.shared = true
 	err := f.decl.body.Execute()
 	return nil, err
 }
@@ -36,7 +37,7 @@ type FnDecl struct {
 }
 
 func (fn *FnDecl) Execute() error {
-	current_env.Define(fn.name, &Function{fn})
+	current_env.Define(fn.name.Lexeme, &Function{fn})
 	return nil	
 }
 
@@ -69,3 +70,18 @@ func (fn *FnCall) Eval() any {
 	}
 	return ret_val
 }
+
+// Native functions
+type NativeFn struct {
+	_arity int
+	_fn func([]any) (any, error)
+}
+
+func (fn *NativeFn) arity() int {
+	return fn._arity
+}
+
+func (fn *NativeFn) call(params []any) (any, error) {
+	return fn._fn(params)
+}
+

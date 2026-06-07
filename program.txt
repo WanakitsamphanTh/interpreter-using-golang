@@ -1,9 +1,5 @@
-fun f(x) {
-  if(x == 0){
-    print 0;
-  }
-  else {
-    f(x - 1);
-    print x;
-  }
-}
+print "Input x > ";
+var x = scanNumber();
+print "Input y > ";
+var y = scanNumber();
+print "x + y = " + (x + y);

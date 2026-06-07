@@ -6,6 +6,7 @@ import(
 )
 
 func main(){
+	InitNativeFunctions()
 	if(len(os.Args) > 2){
 		fmt.Println("Usage: interpreter <script>")
 		return

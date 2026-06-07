@@ -28,7 +28,7 @@ func Parenthesize(node any) string {
 	case *Assignment:
 		return fmt.Sprintf("(Assign %s %s)", n.name.Lexeme, Parenthesize(n.val))
 	case *Variable:
-		return fmt.Sprintf("(Var %s)", n.name.Lexeme)
+		return fmt.Sprintf("%s", n.name.Lexeme)
 	case []Statement:
 		return fmt.Sprintf("(%s)", listOfStatementsString(n))
 	case *Block:
@@ -40,7 +40,7 @@ func Parenthesize(node any) string {
 	case *FnDecl:
 		return fmt.Sprintf("(Fun %s(%v) %s)", n.name.Lexeme, listParamsString(n.params), Parenthesize(n.body))
 	case *FnCall:
-		return fmt.Sprintf("(Call %s (%v))", Parenthesize(n.callee), listParamsString(n.params))
+		return fmt.Sprintf("(%s%s)", Parenthesize(n.callee), listParamsString(n.params))
 	default:
 		return fmt.Sprintf("(%T)", n)
 	}
@@ -66,11 +66,8 @@ func listParamsString(param_list any) string {
 			str = str + param.Lexeme
 		}
 	case []Exp:
-		for i, param := range params {
-			if i != 0 {
-				str = str + ", "
-			}
-			str = str + Parenthesize(param)
+		for _, param := range params {
+			str = str + " " + Parenthesize(param)
 		}
 	default:
 		return "unknown type";

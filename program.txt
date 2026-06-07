@@ -1,24 +1,8 @@
-fun f(){
-    print "before return";
-    return;
-    print "after return (should never be executed)";
-}
-
-f();
-
-fun guess(x, round){
-    for(var i = 0; i < round; i = i + 1){
-        print "enter y:";
-        var y = scanNumber();
-        if (y == x) {
-            print "Yes!";
-            return;
-        }
-        print "Oops! try again";
+while(true){
+    var x = scanNumber();
+    if(x < 0) {
+        break;
+        print "after break (should not be shown)";
     }
+    print "Still a positive value";
 }
-
-guess(10,5);
-
-print "Another round!";
-guess(30,5);

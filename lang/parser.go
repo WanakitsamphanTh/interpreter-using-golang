@@ -148,7 +148,25 @@ func (p *Parser) statement() (Statement, error) {
 	if p.match(RETURN) {
 		return p.returnStmt()
 	}
+	if p.match(SKIP) {
+		return p.skipStmt()
+	}
+	if p.match(BREAK){
+		return p.breakStmt()
+	}
 	return p.newExpressionStatement()
+}
+
+func (p *Parser) skipStmt() (Statement, error) {
+	keyword := p.previous()
+	_, err := p.consume(SEMICOLON, "Expect ';' after skip statement.")
+	return &SkipStmt{keyword}, err
+}
+
+func (p *Parser) breakStmt() (Statement, error) {
+	keyword := p.previous()
+	_, err := p.consume(SEMICOLON, "Expect ';' after break statement.")
+	return &BreakStmt{keyword}, err
 }
 
 func (p *Parser) returnStmt() (Statement, error) {

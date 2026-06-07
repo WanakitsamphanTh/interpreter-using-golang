@@ -91,10 +91,11 @@ type Return struct {
 }
 
 func (r *Return) Execute() error {
-	current_env.Assign("@terminated", true)
 	if r.val != nil{
-		current_env.Assign("@ret_val", r.val.Eval())
+		current_env.TerminateFunction(r.val.Eval())
+		return nil
 	}
+	current_env.TerminateFunction(nil)
 	return nil
 }
 

@@ -43,6 +43,10 @@ func Parenthesize(node any) string {
 		return fmt.Sprintf("(%s%s)", Parenthesize(n.callee), listParamsString(n.params))
 	case *Return:
 		return fmt.Sprintf("(Return %s)", Parenthesize(n.val))
+	case *BreakStmt:
+		return fmt.Sprintf("(Break)")
+	case *SkipStmt:
+		return fmt.Sprintf("(Skip)")
 	default:
 		return fmt.Sprintf("(%T)", n)
 	}

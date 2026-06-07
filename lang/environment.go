@@ -27,12 +27,6 @@ func (e *Environment) Define(name string, val any) {
 }
 
 func (e *Environment) Assign(name string, val any) error {
-	if (name == "@ret_val" || name == "@terminated") && !e.functionBound {
-		if e == global{
-			panic("Cannot assign return value or termination outside a function")
-		}
-		return e.enclosing.Assign(name, val)
-	}
 
 	_, ok := e.values[name]
 	if ok {
@@ -61,6 +55,15 @@ func (e *Environment) GetValue(name string) any {
 	if name == "@terminated"  {
 		if e.functionBound {
 			return e.values["@terminated"]
+		} 
+		isLoop, ok := e.values["@looping"].(bool)
+		if ok {
+			if isLoop {
+				return e.values["@terminated"]
+			}
+		}
+		if e == global {
+			return e.values["@terminated"]
 		}
 		return e.enclosing.GetValue(name)
 	}
@@ -74,6 +77,31 @@ func (e *Environment) GetValue(name string) any {
 		panic("Undefined variable " + name)
 	}
 	return val
+}
+
+func (e *Environment) TerminateLoop() error {
+	
+	_, ok := e.values["@looping"]
+	if !ok {
+		return e.enclosing.TerminateLoop()
+	}
+
+	e.Assign("@terminated", true)
+	
+	return nil
+}
+
+func (e *Environment) TerminateFunction(val any) error {
+	if !e.functionBound {
+		if e == global{
+			panic("Cannot termination outside a function")
+		}
+		e.values["@terminated"] = true
+		return e.enclosing.TerminateFunction(val)
+	}
+	e.values["@terminated"] = true
+	e.values["@ret_val"] = val
+	return nil
 }
 
 var global *Environment = NewEnvironment(nil, false)

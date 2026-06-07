@@ -36,6 +36,7 @@ func (f *Function) call(params []any) (any, error) {
 	if err != nil {
 		return nil, err
 	}
+	current_env.Assign("@terminated",true)
 
 	return current_env.GetValue("@ret_val"), nil
 }

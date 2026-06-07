@@ -37,6 +37,10 @@ func Parenthesize(node any) string {
 		return fmt.Sprintf("(If %s %s %s)", Parenthesize(n.condition), Parenthesize(n.thenBranch), Parenthesize(n.elseBranch))
 	case *WhileStatement:
 		return fmt.Sprintf("(While %s %s)", Parenthesize(n.condition), Parenthesize(n.body))
+	case *FnDecl:
+		return fmt.Sprintf("(Fun %s(%v) %s)", n.name.Lexeme, listParamsString(n.params), Parenthesize(n.body))
+	case *FnCall:
+		return fmt.Sprintf("(Call %s (%v))", Parenthesize(n.callee), listParamsString(n.params))
 	default:
 		return fmt.Sprintf("(%T)", n)
 	}
@@ -49,4 +53,27 @@ func listOfStatementsString(statements []Statement) string{
 		str = str + Parenthesize(stmt)
 	}
 	return str + ""
+}
+
+func listParamsString(param_list any) string {
+	str := ""
+	switch params := param_list.(type) {
+	case []Token:
+		for i, param := range params {
+			if i != 0 {
+				str = str + ", "
+			}
+			str = str + param.Lexeme
+		}
+	case []Exp:
+		for i, param := range params {
+			if i != 0 {
+				str = str + ", "
+			}
+			str = str + Parenthesize(param)
+		}
+	default:
+		return "unknown type";
+	}
+	return str
 }

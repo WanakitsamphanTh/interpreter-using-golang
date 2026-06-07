@@ -6,14 +6,14 @@ import (
 	"bufio"
 )
 
-func run(str string, env *Environment) error {
+func run(str string) error {
 	scanner := NewScanner(str)
 	tokens, err := scanner.scanTokens()
 	if err != nil {
 		return err
 	}
 
-	parser := NewParser(tokens, env)
+	parser := NewParser(tokens)
 	statements, err := parser.parse()
 	if err != nil {
 		return err
@@ -39,11 +39,10 @@ func interpret(statements []Statement) error {
 
 func RunScript(path string) error {
 	data, err := os.ReadFile(path)
-	env := NewEnvironment()
 	if err != nil {
 		return err
 	}
-	err = run(string(data), &env)
+	err = run(string(data))
 	if err != nil {
 		return err
 	}
@@ -51,7 +50,6 @@ func RunScript(path string) error {
 }
 
 func RunREPL() error {
-	env := NewEnvironment()
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("> ")
@@ -65,7 +63,7 @@ func RunREPL() error {
 		}
 		
 		fmt.Println("Input: ", input)
-		err := run(input, &env)
+		err := run(input)
 		if err != nil {
 			fmt.Println("Error:", err.Error())
 		}

@@ -15,7 +15,7 @@ I'm currently studying formal languages and decided to build an interpreter for 
 ***Types of expressions***
 **expression** &rarr; literal | unary | binary | grouping \
 **literal** &rarr; NUMBER | STRING | `true` | `false` | `nil` \
-**unary** &rarr; (`-`|`!`) expression \
+**unary** &rarr; (`-`|`!`) expression | call \
 **binary** &rarr; expression operator expression \
 **operator** &rarr; `+` | `-` | `*` | `/` | `>` | `>=` | `<` | `<=` | `==` | `!=` \
 **grouping** &rarr; `(` expression `)`
@@ -27,10 +27,11 @@ I'm currently studying formal languages and decided to build an interpreter for 
 **comparison** &rarr; term [(`>` | `>=` | `<` | `<=`) term]* \
 **term** &rarr; factor [(`+` | `-`) factor]* \
 **factor** &rarr; unary [(`*` | `/`) unary]* \
-**unary** &rarr; (`-`|`!`) unary | primary \
+**unary** &rarr; (`-`|`!`) unary | call \
+**call** &rarr; primary [`(` arguments?`)`]* \
 **primary** &rarr; literal | grouping \
-**logic_and** &rarr; equality [`and` equality]*
-**logic_or** &rarr; logic_and [`or` logic_and]*
+**logic_and** &rarr; equality [`and` equality]* \
+**logic_or** &rarr; logic_and [`or` logic_and]* \
 
 ## Syntax Grammar
 **program** &rarr; declaration* EOF \
@@ -42,8 +43,9 @@ I'm currently studying formal languages and decided to build an interpreter for 
 **forStmt** &rarr; `for` `(` [varDecl | exprStmt | `;`] exprStmt `;` expression? expression? `)` statement \
 **whileStmt** &rarr; `while` `(` expression `)` statement \
 **varDecl** &rarr; `var` identifier [`=` expression]? `;` \
-**funcDecl** &rarr; `func` identifier `(` [identifier [`,` identifier]* ]? `)` block \
+**funcDecl** &rarr; `func` identifier `(` parameters? `)` block \
 **block** &rarr; `{` statement* `}`
+**arguments** &rarr; identifier [`,` identifier]*
 
 ## Reference
 *Crafting Interpreters* by Robert Nystrom 

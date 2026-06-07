@@ -5,14 +5,12 @@ import "fmt"
 type Parser struct {
 	tokens  []Token
 	current int
-	env *Environment
 }
 
-func NewParser(tokens []Token, env *Environment) *Parser {
+func NewParser(tokens []Token) *Parser {
 	return &Parser{
 		tokens: tokens,
 		current: 0,
-		env: env,
 	}
 }
 
@@ -66,7 +64,52 @@ func (p *Parser) declaration() (Statement, error) {
 	if p.match(VAR) {
 		return p.varDecl()
 	}
+	if p.match(FUN) {
+		return p.fnDecl("function")
+	}
 	return p.statement()
+}
+
+func (p *Parser) fnDecl(kind string) (Statement, error) {
+	name, err := p. consume(IDENTIFIER, "Expect " + kind + " name.")
+	var params []Token
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(LEFT_PAREN, "Expected ( after function name")
+	if err != nil {
+		return nil, err
+	}
+	
+	if !p.check(RIGHT_PAREN) {
+		for {
+			param, err := p.consume(IDENTIFIER, "Expect parameter name.")
+			if err != nil {
+				return nil, err
+			}
+			params = append(params, param)
+			if !p.match(COMMA) {
+				break
+			}
+		}
+	}
+	_, err = p.consume(RIGHT_PAREN, "Expected ) after function declaration")
+	if err != nil {
+		return nil, err
+	}
+	_, err = p.consume(LEFT_BRACE, "Expect '{' before " + kind + " body.")
+	if err != nil {
+		return nil, err
+	}
+	body, err := p.newBlock()
+	if err != nil {
+		return nil, err
+	}
+
+	fnBody := body.(*Block)
+	
+	return &FnDecl{name, params, fnBody}, nil
 }
 
 func (p *Parser) expression() (Exp, error) {
@@ -83,7 +126,7 @@ func (p *Parser) varDecl() (Statement, error) {
 		}
 	}
 	_, err = p.consume(SEMICOLON, "Expected ; after variable declaration.")
-	return &Var{name, init, p.env}, err
+	return &Var{name, init}, err
 }
 
 func (p *Parser) statement() (Statement, error) {
@@ -110,10 +153,6 @@ func (p *Parser) forLoop() (Statement, error) {
 	var init Statement
 	var err error
 
-	prev := p.env
-	current_env := NewNestedEnvironment(prev)
-	p.env = &current_env
-
 	if p.match(SEMICOLON){
 		init = nil
 	} else if p.match(VAR) {
@@ -123,7 +162,6 @@ func (p *Parser) forLoop() (Statement, error) {
 	}
 
 	if err != nil {
-		p.env = prev
 		return nil, err
 	}
 
@@ -132,7 +170,6 @@ func (p *Parser) forLoop() (Statement, error) {
       cond, err = p.expression()
     }
 	if err != nil {
-		p.env = prev
 		return nil, err
 	}
 	p.consume(SEMICOLON, "Expect ';' after loop condition.")
@@ -142,20 +179,18 @@ func (p *Parser) forLoop() (Statement, error) {
       increment, err = p.expression()
     }
 	if err != nil {
-		p.env = prev
 		return nil, err
 	}
 	p.consume(RIGHT_PAREN, "Expect ')' after condition.")
 
 	body, err := p.statement()
 	if err != nil {
-		p.env = prev
 		return nil, err
 	}
 
 	if increment != nil {
 		incrementStmt := NewExpressionStatement(increment)
-		body = &Block{[]Statement{body, incrementStmt},&current_env}
+		body = &Block{[]Statement{body, incrementStmt}}
 	}
 
 	if cond == nil {
@@ -165,10 +200,9 @@ func (p *Parser) forLoop() (Statement, error) {
 	body = &WhileStatement{cond,body}
 
 	if init != nil {
-		body = &Block{[]Statement{init, body},&current_env}
+		body = &Block{[]Statement{init, body}}
 	}
 
-	p.env = prev
 	return body, nil
 }
 
@@ -193,20 +227,15 @@ func (p *Parser) whileLoop() (Statement, error) {
 
 func (p *Parser) newBlock() (Statement, error) {
 	var statements []Statement
-	prev := p.env
-	current_env := NewNestedEnvironment(prev)
-	p.env = &current_env
 	for !p.check(RIGHT_BRACE) && !p.isAtEnd() {
 		statement, err :=  p.declaration()
 		if err != nil {
-			p.env = prev
 			return nil, err
 		}
 		statements = append(statements, statement)
 	}
 	_, err := p.consume(RIGHT_BRACE, "Expect '}' after block.");
-	p.env = prev
-	return NewBlock(statements, &current_env), err
+	return &Block{statements}, err
 }
 
 func (p *Parser) newExpressionStatement() (Statement, error) {
@@ -260,7 +289,7 @@ func (p *Parser) assignment() (Exp, error) {
 		if !ok {
 			return nil, raiseError(equals, "Invalid assignment target")
 		}
-		return &Assignment{var_expr.name, val, p.env}, nil
+		return &Assignment{var_expr.name, val}, nil
 	}
 	return expr, nil
 }
@@ -353,7 +382,46 @@ func (p *Parser) unary() (Exp, error) {
 		}
 		return &UnaryExp{op, right}, nil
 	}
-	return p.primary()
+	return p.call()
+}
+
+func (p *Parser) call() (Exp, error) {
+	expr, err := p.primary()
+	if err != nil {
+		return nil, err
+	}
+	for {
+		if p.match(LEFT_PAREN) {
+			expr, err = p.finishCall(expr)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			break
+		}
+	}
+	return expr, nil
+}
+
+func (p *Parser) finishCall(callee Exp) (Exp, error) {
+	var params []Exp
+	if !p.check(RIGHT_PAREN) {
+		for {
+			if len(params) >= 255 {
+				return nil, raiseError(p.peek(), "No more than 255 parameters")
+			}
+			param, err := p.expression()
+			if err != nil {
+				return nil, err
+			}
+			params = append(params, param)
+			if !p.match(COMMA) {
+				break
+			}
+		}
+	}
+	paren, err := p.consume(RIGHT_PAREN, "Expect ')' after arguments.")
+	return &FnCall{callee, paren, params}, err
 }
 
 func (p *Parser) primary() (Exp, error) {
@@ -381,7 +449,7 @@ func (p *Parser) primary() (Exp, error) {
 		return &GroupingExp{expr}, nil
 	}
 	if p.match(IDENTIFIER) {
-		return &Variable{p.previous(), p.env}, nil
+		return &Variable{p.previous()}, nil
 	}
 	return nil, raiseError(p.peek(), "Expect expression")
 }

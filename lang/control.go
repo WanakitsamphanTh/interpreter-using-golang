@@ -10,7 +10,10 @@ func (s *IfStatement) Execute() error {
 	if isTruthy(s.condition.Eval()) {
 		return s.thenBranch.Execute()
 	} else {
-		return s.elseBranch.Execute()
+		if s.elseBranch != nil {
+			return s.elseBranch.Execute()
+		}
+		return nil
 	}
 }
 
@@ -22,6 +25,9 @@ type WhileStatement struct {
 func (s *WhileStatement) Execute() error {
 	for isTruthy(s.condition.Eval()) {
 		err := s.body.Execute()
+		if current_env.GetValue("@terminated").(bool) {
+			break
+		}
 		if err != nil {
 			return err
 		}

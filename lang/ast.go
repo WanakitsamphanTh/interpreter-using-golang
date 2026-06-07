@@ -41,6 +41,8 @@ func Parenthesize(node any) string {
 		return fmt.Sprintf("(Fun %s(%v) %s)", n.name.Lexeme, listParamsString(n.params), Parenthesize(n.body))
 	case *FnCall:
 		return fmt.Sprintf("(%s%s)", Parenthesize(n.callee), listParamsString(n.params))
+	case *Return:
+		return fmt.Sprintf("(Return %s)", Parenthesize(n.val))
 	default:
 		return fmt.Sprintf("(%T)", n)
 	}

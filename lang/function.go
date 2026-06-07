@@ -11,6 +11,7 @@ type Callable interface {
 
 type Function struct {
 	decl *FnDecl
+	closure *Environment
 }
 
 func (f *Function) arity() int {
@@ -18,17 +19,25 @@ func (f *Function) arity() int {
 }
 
 func (f *Function) call(params []any) (any, error) {
-	NewNestedEnvironment(true)
-	defer RetractEnvironment()
+	//NewNestedEnvironment(true)
+	//defer RetractEnvironment()
+	prev := current_env
+	current_env = NewEnvironment(f.closure, true)
+	defer func(){ 
+		current_env = prev
+	}()
+
 	for i, param := range f.decl.params {
 		current_env.Define(param.Lexeme, params[i])
 	}
+
 	f.decl.body.shared = true
 	err := f.decl.body.Execute()
 	if err != nil {
 		return nil, err
 	}
-	return current_env.GetValue("ret_val"), nil
+
+	return current_env.GetValue("@ret_val"), nil
 }
 
 // FnDecl struct
@@ -40,7 +49,7 @@ type FnDecl struct {
 }
 
 func (fn *FnDecl) Execute() error {
-	current_env.Define(fn.name.Lexeme, &Function{fn})
+	current_env.Define(fn.name.Lexeme, &Function{fn, current_env})
 	return nil	
 }
 
@@ -81,7 +90,10 @@ type Return struct {
 }
 
 func (r *Return) Execute() error {
-	current_env.Assign("ret_val", r.val.Eval())
+	current_env.Assign("@terminated", true)
+	if r.val != nil{
+		current_env.Assign("@ret_val", r.val.Eval())
+	}
 	return nil
 }
 

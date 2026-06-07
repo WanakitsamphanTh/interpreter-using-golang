@@ -15,8 +15,10 @@ func NewEnvironment(enclosing *Environment, functionBound bool) *Environment {
 	e.enclosing = enclosing
 	e.functionBound = functionBound
 	if e.functionBound {
-		e.Define("ret_val", nil)
+		e.Define("@ret_val", nil)
 	}
+	e.Define("@terminated", false)
+
 	return &e
 }
 
@@ -25,9 +27,9 @@ func (e *Environment) Define(name string, val any) {
 }
 
 func (e *Environment) Assign(name string, val any) error {
-	if name == "ret_val" && !e.functionBound {
+	if (name == "@ret_val" || name == "@terminated") && !e.functionBound {
 		if e == global{
-			panic("Cannot assign return value outside a function")
+			panic("Cannot assign return value or termination outside a function")
 		}
 		return e.enclosing.Assign(name, val)
 	}
@@ -39,7 +41,6 @@ func (e *Environment) Assign(name string, val any) error {
 	}
 
 	if !ok && e.enclosing != nil {
-		fmt.Printf("Retracted to %p", e.enclosing)
 		err := e.enclosing.Assign(name,val)
 		if err == nil {
 			return nil
@@ -50,9 +51,16 @@ func (e *Environment) Assign(name string, val any) error {
 }
 
 func (e *Environment) GetValue(name string) any {
-	if name == "ret_val" && !e.functionBound {
+	if name == "@ret_val" && !e.functionBound {
 		if e == global{
 			panic("Cannot access return value outside a function")
+		}
+		return e.enclosing.GetValue(name)
+	}
+
+	if name == "@terminated"  {
+		if e.functionBound {
+			return e.values["@terminated"]
 		}
 		return e.enclosing.GetValue(name)
 	}
@@ -60,7 +68,6 @@ func (e *Environment) GetValue(name string) any {
 	val, ok := e.values[name]
 	if !ok {
 		if e.enclosing != nil {
-			fmt.Printf("Retracted to %p", e.enclosing)
 			val = e.enclosing.GetValue(name)
 			return val
 		}

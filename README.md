@@ -9,6 +9,9 @@ I'm currently studying formal languages and decided to build an interpreter for 
 - Implemented expression statement & print statement execution
 - Implemented scope
 - Implemented control flow (if-else, while and for loop)
+- Implemented function
+- implemented closure
+- Implemented return statement
 - Implementing syntax & runtime error
 
 ## Expression Grammar
@@ -45,7 +48,7 @@ I'm currently studying formal languages and decided to build an interpreter for 
 **whileStmt** &rarr; `while` `(` expression `)` statement \
 **varDecl** &rarr; `var` identifier [`=` expression]? `;` \
 **funcDecl** &rarr; `func` identifier `(` parameters? `)` block \
-**block** &rarr; `{` statement* `}`
+**block** &rarr; `{` statement* `}` \
 **arguments** &rarr; identifier [`,` identifier]*
 
 ## Reference

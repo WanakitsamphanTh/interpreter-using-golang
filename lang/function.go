@@ -18,14 +18,17 @@ func (f *Function) arity() int {
 }
 
 func (f *Function) call(params []any) (any, error) {
-	NewNestedEnvironment()
+	NewNestedEnvironment(true)
 	defer RetractEnvironment()
 	for i, param := range f.decl.params {
 		current_env.Define(param.Lexeme, params[i])
 	}
 	f.decl.body.shared = true
 	err := f.decl.body.Execute()
-	return nil, err
+	if err != nil {
+		return nil, err
+	}
+	return current_env.GetValue("ret_val"), nil
 }
 
 // FnDecl struct
@@ -69,6 +72,17 @@ func (fn *FnCall) Eval() any {
 		panic(err.Error())
 	}
 	return ret_val
+}
+
+// Return struct
+type Return struct {
+	keyword Token
+	val Exp
+}
+
+func (r *Return) Execute() error {
+	current_env.Assign("ret_val", r.val.Eval())
+	return nil
 }
 
 // Native functions

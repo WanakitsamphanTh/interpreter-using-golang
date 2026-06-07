@@ -17,7 +17,7 @@ func NewPrintStatement(expr Exp) Statement {
 func (s *PrintStatement) Execute() error {
 	val := s.expr.Eval()
 	if val == nil {
-		return fmt.Errorf("Error")
+		return fmt.Errorf("Undefined value")
 	}
 	fmt.Printf("%v\n", val)
 	return nil

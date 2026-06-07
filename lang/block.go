@@ -8,7 +8,7 @@ type Block struct {
 func (b *Block) Execute() error {
 	for _, stmt := range b.statements {
 		if !b.shared {
-			NewNestedEnvironment()
+			NewNestedEnvironment(false)
 			defer RetractEnvironment()
 		}
 		err := stmt.Execute()

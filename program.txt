@@ -1,5 +1,15 @@
-print "Input x > ";
-var x = scanNumber();
-print "Input y > ";
-var y = scanNumber();
-print "x + y = " + (x + y);
+fun f(x) {
+    print x * 2;
+}
+
+fun g(x) {
+    return x * 2;
+}
+
+f(10);
+g(10);
+
+f(10);
+print f(10);
+
+print g(10);

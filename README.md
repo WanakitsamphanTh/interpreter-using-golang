@@ -36,9 +36,10 @@ I'm currently studying formal languages and decided to build an interpreter for 
 ## Syntax Grammar
 **program** &rarr; declaration* EOF \
 **declaration** &rarr; varDecl | funcDecl | statement \
-**statement** &rarr; exprStmt | printStmt | ifStmt | block \
+**statement** &rarr; exprStmt | printStmt | ifStmt | forStmt | whileStmt | returnStmt | block \
 **exprStmt** &rarr; expression `;` \
 **printStmt** &rarr; `print` expression `;`  \
+**returnStmt** &rarr; `return` expression? `;` \
 **ifStmt** &rarr; `if` `(` expression `)` statement [`else` statement]? \
 **forStmt** &rarr; `for` `(` [varDecl | exprStmt | `;`] exprStmt `;` expression? expression? `)` statement \
 **whileStmt** &rarr; `while` `(` expression `)` statement \

@@ -145,7 +145,24 @@ func (p *Parser) statement() (Statement, error) {
 	if p.match(FOR) {
 		return p.forLoop()
 	}
+	if p.match(RETURN) {
+		return p.returnStmt()
+	}
 	return p.newExpressionStatement()
+}
+
+func (p *Parser) returnStmt() (Statement, error) {
+	keyword := p.previous()
+	var val Exp
+	var err error
+	if !p.check(SEMICOLON) {
+		val, err = p.expression()
+	}
+	if err != nil {
+		return nil, err
+	}
+	_, err = p.consume(SEMICOLON, "Expect ';' after return value.")
+	return &Return{keyword, val}, err
 }
 
 func (p *Parser) forLoop() (Statement, error) {

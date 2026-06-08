@@ -130,9 +130,6 @@ func (p *Parser) varDecl() (Statement, error) {
 }
 
 func (p *Parser) statement() (Statement, error) {
-	if p.match(PRINT) {
-		return p.newPrintStatement()
-	}
 	if p.match(LEFT_BRACE) {
 		return p.newBlock()
 	}
@@ -280,15 +277,6 @@ func (p *Parser) newExpressionStatement() (Statement, error) {
 	}
 	_, err = p.consume(SEMICOLON, "Expected ; after expression.")
 	return NewExpressionStatement(expr), err
-}
-
-func (p *Parser) newPrintStatement() (Statement, error) {
-	expr, err := p.expression()
-	if err != nil {
-		return nil, err
-	}
-	_, err = p.consume(SEMICOLON, "Expected ; after value.")
-	return NewPrintStatement(expr), err
 }
 
 func (p *Parser) equality() (Exp, error) {

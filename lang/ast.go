@@ -13,7 +13,7 @@ func Parenthesize(node any) string {
 	case *LiteralExp:
 		val, ok := n.Value.(string)
 		if ok {
-			return fmt.Sprintf("\"%v\"", val)
+			return printStringLiteral(val)
 		} else {
 			return fmt.Sprintf("%v", n.Value)
 		}
@@ -51,6 +51,26 @@ func Parenthesize(node any) string {
 		return fmt.Sprintf("(%T)", n)
 	}
 
+}
+
+func printStringLiteral(_str string) string {
+	str := ""
+	var c rune
+	for _, c = range _str {
+		switch c{
+		case '\n':
+			str = str + "\\n"
+		case '\t':
+			str = str + "\\t"
+		case '\\':
+			str = str + "\\\\"
+		case '"':
+			str = str + "\\\""
+		default:
+			str = str + string(c)
+		}
+	}
+	return fmt.Sprintf("\"%s\"",str)
 }
 
 func listOfStatementsString(statements []Statement) string{

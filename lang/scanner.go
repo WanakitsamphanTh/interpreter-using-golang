@@ -168,17 +168,35 @@ func (s *Scanner) peekNext() byte {
 }
 
 func (s *Scanner) stringLiteral() error {
+	literal := ""
+	var char byte
 	for s.peek() != '"' && !s.isAtEnd() {
       if s.peek() == '\n' {
 		s.line++;
 	  }
-      s.advance();
+	  char = s.advance()
+	  if char == '\\' {
+		switch s.advance() {
+		case 'n':
+			char = '\n'
+		case 't':
+			char = '\t'
+		case '\\':
+			char = '\\'
+		case '"':
+			char = '"' 
+		default:
+			return &SyntaxError{s.line, "Unknown string format"}
+		}
+	  }
+	  literal = literal + string(char)
     }
 	if s.isAtEnd() {
 		return &SyntaxError{s.line, "Unterminated string."}
 	}
 	s.advance() // The closing ".
-	value := s.source[s.start+1 : s.current-1]
+	//value := s.source[s.start+1 : s.current-1]
+	value := literal
 	s.addToken(STRING, value)
 	return nil
 }

@@ -46,7 +46,6 @@ const (
 	IF
 	NIL
 	OR
-	PRINT
 	RETURN
 	SUPER
 	THIS
@@ -96,8 +95,6 @@ func mapKeyword(lexeme string) Keyword {
 		return NIL
 	case "or":
 		return OR
-	case "print":
-		return PRINT
 	case "return":
 		return RETURN
 	case "super":

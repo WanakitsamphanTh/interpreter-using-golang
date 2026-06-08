@@ -3,11 +3,11 @@ var x = 100;
 fun guess(x){
     var i = 1;
     while(scanNumber() != x){
-        print "wrong";
+        printLn("\"wrong\"");
         i = i + 1;
     }
     return i;
 }
 
 var times = guess(10);
-print "played " + times + " times";
+printLn("played ",times," times\n");

@@ -20,14 +20,14 @@ func run(str string) error {
 	}
 	ast := Parenthesize(statements)
 	fmt.Println("Abstract Syntax Tree:\n", ast)
-	err = interpret(statements)
-	if err != nil {
-		return err
+	_err := interpret(statements)
+	if _err != nil {
+		return _err.(error)
 	}
 	return nil
 }
 
-func interpret(statements []Statement) error {
+func interpret(statements []Statement) disruptive {
 	for _, statement := range statements {
 		err := statement.Execute()
 		if err != nil {
@@ -65,6 +65,7 @@ func RunREPL() error {
 		fmt.Println("Input: ", input)
 		err := run(input)
 		if err != nil {
+			err := err.(error)
 			fmt.Println("Error:", err.Error())
 		}
 	}

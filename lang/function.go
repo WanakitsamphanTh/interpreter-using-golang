@@ -3,7 +3,7 @@ package lang
 import "fmt"
 
 type Callable interface {
-	call(params []any) (any, error)
+	call(params []any) (any, disruptive)
 	arity() int
 }
 
@@ -18,7 +18,7 @@ func (f *Function) arity() int {
 	return len(f.decl.params)
 }
 
-func (f *Function) call(params []any) (any, error) {
+func (f *Function) call(params []any) (any, disruptive) {
 	//NewNestedEnvironment(true)
 	//defer RetractEnvironment()
 	prev := current_env
@@ -34,11 +34,18 @@ func (f *Function) call(params []any) (any, error) {
 	f.decl.body.shared = true
 	err := f.decl.body.Execute()
 	if err != nil {
-		return nil, err
+		switch disruption := err.(type){
+		case *Return:
+			if disruption.val != nil {
+				return disruption.val.Eval(), nil
+			}
+			return nil, nil
+		default:
+			return nil, err
+		}
 	}
-	current_env.Assign("@terminated",true)
 
-	return current_env.GetValue("@ret_val"), nil
+	return nil, nil
 }
 
 // FnDecl struct
@@ -49,7 +56,7 @@ type FnDecl struct {
 	body *Block
 }
 
-func (fn *FnDecl) Execute() error {
+func (fn *FnDecl) Execute() disruptive {
 	current_env.Define(fn.name.Lexeme, &Function{fn, current_env})
 	return nil	
 }
@@ -79,6 +86,7 @@ func (fn *FnCall) Eval() any {
 	}
 	ret_val, err := callable.call(params)
 	if err != nil {
+		err := err.(error)
 		panic(err.Error())
 	}
 	return ret_val
@@ -90,26 +98,21 @@ type Return struct {
 	val Exp
 }
 
-func (r *Return) Execute() error {
-	if r.val != nil{
-		current_env.TerminateFunction(r.val.Eval())
-		return nil
-	}
-	current_env.TerminateFunction(nil)
-	return nil
+func (r *Return) Execute() disruptive {
+	return r
 }
 
 // Native functions
 type NativeFn struct {
 	_arity int
-	_fn func([]any) (any, error)
+	_fn func([]any) (any, disruptive)
 }
 
 func (fn *NativeFn) arity() int {
 	return fn._arity
 }
 
-func (fn *NativeFn) call(params []any) (any, error) {
+func (fn *NativeFn) call(params []any) (any, disruptive) {
 	return fn._fn(params)
 }
 

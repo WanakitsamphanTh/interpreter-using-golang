@@ -3,7 +3,7 @@ package lang
 import "fmt"
 
 type Statement interface {
-	Execute() error
+	Execute() disruptive
 }
 
 type PrintStatement struct {
@@ -14,7 +14,7 @@ func NewPrintStatement(expr Exp) Statement {
 	return &PrintStatement{expr}
 }
 
-func (s *PrintStatement) Execute() error {
+func (s *PrintStatement) Execute() disruptive {
 	val := s.expr.Eval()
 	if val == nil {
 		return fmt.Errorf("Undefined value")
@@ -31,7 +31,7 @@ func NewExpressionStatement(expr Exp) Statement {
 	return &ExpressionStatement{expr}
 }
 
-func (s *ExpressionStatement) Execute() error {
+func (s *ExpressionStatement) Execute() disruptive {
 	s.expr.Eval()
 	return nil
 }

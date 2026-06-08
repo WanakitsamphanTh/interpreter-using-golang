@@ -54,6 +54,7 @@ const (
 	VAR
 	WHILE
 	BREAK
+	SKIP
 
 	// EOF
 	EOF
@@ -111,6 +112,8 @@ func mapKeyword(lexeme string) Keyword {
 		return WHILE
 	case "break":
 		return BREAK
+	case "skip":
+		return SKIP
 	default:
 		return IDENTIFIER
 	}

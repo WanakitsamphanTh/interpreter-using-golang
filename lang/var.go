@@ -5,7 +5,7 @@ type Var struct {
 	init Exp
 }
 
-func (v *Var) Execute() error {
+func (v *Var) Execute() disruptive {
 	if v.init != nil {
 		value := v.init.Eval()
 		current_env.Define(v.name.Lexeme, value)

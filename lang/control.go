@@ -6,7 +6,7 @@ type IfStatement struct {
 	elseBranch Statement
 }
 
-func (s *IfStatement) Execute() error {
+func (s *IfStatement) Execute() disruptive {
 	if isTruthy(s.condition.Eval()) {
 		return s.thenBranch.Execute()
 	} else {
@@ -22,17 +22,18 @@ type WhileStatement struct {
 	body Statement
 }
 
-func (s *WhileStatement) Execute() error {
-	current_env.Define("@looping", true)
-	defer current_env.Assign("@looping", false)
-	
+func (s *WhileStatement) Execute() disruptive {
 	for isTruthy(s.condition.Eval()) {
 		err := s.body.Execute()
-		if current_env.GetValue("@terminated").(bool) {
-			break
-		}
 		if err != nil {
-			return err
+			switch disruption := err.(type) {
+			case *BreakStmt:
+				return nil
+			case *SkipStmt:
+				continue
+			default:
+				return disruption
+			}
 		}
 	}
 	return nil
@@ -43,14 +44,14 @@ type BreakStmt struct {
 	keyword Token
 }
 
-func (s *BreakStmt) Execute() error {
-	return current_env.TerminateLoop()
+func (s *BreakStmt) Execute() disruptive {
+	return s
 }
 
 type SkipStmt struct {
 	keyword Token
 }
 
-func (s *SkipStmt) Execute() error {
-	return nil
+func (s *SkipStmt) Execute() disruptive {
+	return s
 }

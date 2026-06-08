@@ -1,25 +1,27 @@
 package lang
 
-//import "fmt";
-
 type Block struct {
 	statements []Statement
+	defering Statement
 	shared bool
 }
 
-func (b *Block) Execute() error {
+func (b *Block) Execute() disruptive {
 	if !b.shared {
 		NewNestedEnvironment(false)
 		defer RetractEnvironment()
 	}
-	for _, stmt := range b.statements {
-		err := stmt.Execute()
-		if err != nil {
-			return err
+	defer func() {
+		if b.defering != nil {
+			b.defering.Execute()
 		}
-		terminated := current_env.GetValue("@terminated").(bool)
-		if terminated {
-			return nil
+	}()
+	if b.statements != nil {
+		for _, stmt := range b.statements {
+			err := stmt.Execute()
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

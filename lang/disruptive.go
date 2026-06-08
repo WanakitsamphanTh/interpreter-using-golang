@@ -2,6 +2,8 @@ package lang
 
 import "fmt"
 
+type disruptive = any
+
 type RuntimeError struct {
 	token Token
 	error string

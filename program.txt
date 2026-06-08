@@ -1,20 +1,13 @@
-fun makeClosure(){
-    var i = 0;
-    fun closure(){
+var x = 100;
+
+fun guess(x){
+    var i = 1;
+    while(scanNumber() != x){
+        print "wrong";
         i = i + 1;
-        for(var j = 0; j <= i; j = j + 1){
-            if(j == 3) {} 
-            else print j;
-        }
-        return i;
     }
-    return closure;
+    return i;
 }
 
-var closure = makeClosure();
-
-print "i = " + closure();
-print "i = " + closure();
-print "i = " + closure();
-print "i = " + closure();
-print "i = " + closure();
+var times = guess(10);
+print "played " + times + " times";

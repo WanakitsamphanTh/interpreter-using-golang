@@ -3,13 +3,13 @@ package lang
 import "fmt"
 
 type Exp interface {
+	Resolveable
 	Eval() any
 }
 
-
 // UnaryExp
 type UnaryExp struct {
-	Op	Token
+	Op    Token
 	Right Exp
 }
 
@@ -23,11 +23,10 @@ func (u UnaryExp) Eval() any {
 	return u.Right.Eval()
 }
 
-
 // BinaryExp
 type BinaryExp struct {
 	Left  Exp
-	Op	Token
+	Op    Token
 	Right Exp
 }
 
@@ -36,7 +35,7 @@ func (b BinaryExp) Eval() any {
 	right := b.Right.Eval()
 	switch b.Op.Type {
 	case PLUS:
-		switch l := left.(type){
+		switch l := left.(type) {
 		case float64:
 			r, ok := right.(float64)
 			if !ok {
@@ -78,7 +77,6 @@ func (b BinaryExp) Eval() any {
 	return nil
 }
 
-
 // GroupingExp
 type GroupingExp struct {
 	Exp Exp
@@ -88,7 +86,6 @@ func (g GroupingExp) Eval() any {
 	return g.Exp.Eval()
 }
 
-
 // LiteralExp
 type LiteralExp struct {
 	Value any
@@ -97,7 +94,6 @@ type LiteralExp struct {
 func (l LiteralExp) Eval() any {
 	return l.Value
 }
-
 
 // Miscellaneous
 
@@ -120,8 +116,8 @@ func isEqual(a any, b any) bool {
 }
 
 type LogicalExpression struct {
-	Op Token
-	left Exp
+	Op    Token
+	left  Exp
 	right Exp
 }
 

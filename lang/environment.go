@@ -4,8 +4,8 @@ import "fmt"
 
 // Environment: mapping variables into variable statements (like Java)
 type Environment struct {
-	values map[string]any
-	enclosing *Environment
+	values        map[string]any
+	enclosing     *Environment
 	functionBound bool
 }
 
@@ -31,7 +31,7 @@ func (e *Environment) Assign(name string, val any) error {
 	}
 
 	if !ok && e.enclosing != nil {
-		err := e.enclosing.Assign(name,val)
+		err := e.enclosing.Assign(name, val)
 		if err == nil {
 			return nil
 		}
@@ -51,6 +51,18 @@ func (e *Environment) GetValue(name string) any {
 		panic("Undefined variable " + name)
 	}
 	return val
+}
+
+func (e *Environment) GetAt(distance int, name string) any {
+	return e.ancestor(distance).values[name]
+}
+
+func (e *Environment) ancestor(distance int) *Environment {
+	env := e
+	for i := 0; i < distance; i++ {
+		env = env.enclosing
+	}
+	return env
 }
 
 var global *Environment = NewEnvironment(nil, false)

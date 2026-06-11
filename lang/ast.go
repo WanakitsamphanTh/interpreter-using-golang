@@ -5,7 +5,7 @@ import (
 )
 
 func Parenthesize(node any) string {
-	switch n:= node.(type) {
+	switch n := node.(type) {
 	case *BinaryExp:
 		return fmt.Sprintf("(%s %s %s)", n.Op.Lexeme, Parenthesize(n.Left), Parenthesize(n.Right))
 	case *GroupingExp:
@@ -21,8 +21,8 @@ func Parenthesize(node any) string {
 		return fmt.Sprintf("(%s %s)", n.Op.Lexeme, Parenthesize(n.Right))
 	case *ExpressionStatement:
 		return Parenthesize(n.expr)
-	case *PrintStatement:
-		return fmt.Sprintf("(Print %s)", Parenthesize(n.expr))
+	//case *PrintStatement:
+	//	return fmt.Sprintf("(Print %s)", Parenthesize(n.expr))
 	case *Var:
 		return fmt.Sprintf("(VarDecl %s %s)", n.name.Lexeme, Parenthesize(n.init))
 	case *Assignment:
@@ -44,9 +44,9 @@ func Parenthesize(node any) string {
 	case *Return:
 		return fmt.Sprintf("(Return %s)", Parenthesize(n.val))
 	case *BreakStmt:
-		return fmt.Sprintf("(Break)")
+		return "(Break)"
 	case *SkipStmt:
-		return fmt.Sprintf("(Skip)")
+		return "(Skip)"
 	default:
 		return fmt.Sprintf("(%T)", n)
 	}
@@ -57,7 +57,7 @@ func printStringLiteral(_str string) string {
 	str := ""
 	var c rune
 	for _, c = range _str {
-		switch c{
+		switch c {
 		case '\n':
 			str = str + "\\n"
 		case '\t':
@@ -70,10 +70,10 @@ func printStringLiteral(_str string) string {
 			str = str + string(c)
 		}
 	}
-	return fmt.Sprintf("\"%s\"",str)
+	return fmt.Sprintf("\"%s\"", str)
 }
 
-func listOfStatementsString(statements []Statement) string{
+func listOfStatementsString(statements []Statement) string {
 	str := ""
 	for _, stmt := range statements {
 		str = str + Parenthesize(stmt)
@@ -96,7 +96,7 @@ func listParamsString(param_list any) string {
 			str = str + " " + Parenthesize(param)
 		}
 	default:
-		return "unknown type";
+		return "unknown type"
 	}
 	return str
 }

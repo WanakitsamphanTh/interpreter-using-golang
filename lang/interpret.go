@@ -1,9 +1,9 @@
 package lang
 
 import (
+	"bufio"
 	"fmt"
 	"os"
-	"bufio"
 )
 
 func run(str string) error {
@@ -18,8 +18,17 @@ func run(str string) error {
 	if err != nil {
 		return err
 	}
+
 	ast := Parenthesize(statements)
 	fmt.Println("Abstract Syntax Tree:\n", ast)
+
+	for _, stmt := range statements {
+		err := stmt.Resolve()
+		if err != nil {
+			return err
+		}
+	}
+
 	_err := interpret(statements)
 	if _err != nil {
 		return _err.(error)
@@ -55,13 +64,13 @@ func RunREPL() error {
 		fmt.Print("> ")
 		var input string
 
-		scanner.Scan() 
+		scanner.Scan()
 		input = scanner.Text()
 
 		if input == "" {
 			break
 		}
-		
+
 		fmt.Println("Input: ", input)
 		err := run(input)
 		if err != nil {

@@ -15,23 +15,36 @@ func (v *Var) Execute() disruptive {
 	return nil
 }
 
-//Variable implements Exp
+// Variable implements Exp
 type Variable struct {
 	name Token
 }
 
 func (v *Variable) Eval() any {
-	return current_env.GetValue(v.name.Lexeme)
+	return LookUpVariable(v.name.Lexeme, v)
 }
 
 // Assignment
 type Assignment struct {
 	name Token
-	val Exp
+	val  Exp
 }
 
 func (a *Assignment) Eval() any {
 	val := a.val.Eval()
-	current_env.Assign(a.name.Lexeme, val)
+
+	distance, ok := locals[a]
+	if !ok {
+		err := current_env.assignAt(distance, a.name.Lexeme, val)
+		if err != nil {
+			panic(err.Error())
+		}
+	} else {
+		err := global.Assign(a.name.Lexeme, val)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
 	return val
 }

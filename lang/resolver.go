@@ -142,15 +142,6 @@ func (v *Variable) Resolve() error {
 	return nil
 }
 
-func LookUpVariable(name string, expr Exp) any {
-	distance, ok := locals[expr]
-	if !ok {
-		return current_env.GetAt(distance, name)
-	} else {
-		return global.GetValue(name)
-	}
-}
-
 func (v *Assignment) Resolve() error {
 	err := v.val.Resolve()
 	if err != nil {

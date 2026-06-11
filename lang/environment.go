@@ -65,6 +65,15 @@ func (e *Environment) ancestor(distance int) *Environment {
 	return env
 }
 
+func LookUpVariable(name string, expr Exp) any {
+	distance, ok := locals[expr]
+	if !ok {
+		return current_env.GetAt(distance, name)
+	} else {
+		return global.GetValue(name)
+	}
+}
+
 var global *Environment = NewEnvironment(nil, false)
 var current_env *Environment = global
 
@@ -80,4 +89,8 @@ func RetractEnvironment() (*Environment, error) {
 	}
 	current_env = current_env.enclosing
 	return current_env, nil
+}
+
+func (e *Environment) assignAt(distance int, name string, val any) error {
+	return current_env.ancestor(distance).Assign(name, val)
 }

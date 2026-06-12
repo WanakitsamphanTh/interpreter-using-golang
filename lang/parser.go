@@ -9,7 +9,7 @@ type Parser struct {
 
 func NewParser(tokens []Token) *Parser {
 	return &Parser{
-		tokens: tokens,
+		tokens:  tokens,
 		current: 0,
 	}
 }
@@ -28,7 +28,7 @@ func (p *Parser) parse() ([]Statement, error) {
 }
 
 func (p *Parser) ifElse() (Statement, error) {
-	_, err := p.consume(LEFT_PAREN,  "Expect '(' after 'if'.")
+	_, err := p.consume(LEFT_PAREN, "Expect '(' after 'if'.")
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (p *Parser) ifElse() (Statement, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = p.consume(RIGHT_PAREN,  "Expect ')' after condition.")
+	_, err = p.consume(RIGHT_PAREN, "Expect ')' after condition.")
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (p *Parser) declaration() (Statement, error) {
 }
 
 func (p *Parser) fnDecl(kind string) (Statement, error) {
-	name, err := p. consume(IDENTIFIER, "Expect " + kind + " name.")
+	name, err := p.consume(IDENTIFIER, "Expect "+kind+" name.")
 	var params []Token
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (p *Parser) fnDecl(kind string) (Statement, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if !p.check(RIGHT_PAREN) {
 		for {
 			param, err := p.consume(IDENTIFIER, "Expect parameter name.")
@@ -98,7 +98,7 @@ func (p *Parser) fnDecl(kind string) (Statement, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = p.consume(LEFT_BRACE, "Expect '{' before " + kind + " body.")
+	_, err = p.consume(LEFT_BRACE, "Expect '{' before "+kind+" body.")
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (p *Parser) fnDecl(kind string) (Statement, error) {
 	}
 
 	fnBody := body.(*Block)
-	
+
 	return &FnDecl{name, params, fnBody}, nil
 }
 
@@ -148,7 +148,7 @@ func (p *Parser) statement() (Statement, error) {
 	if p.match(SKIP) {
 		return p.skipStmt()
 	}
-	if p.match(BREAK){
+	if p.match(BREAK) {
 		return p.breakStmt()
 	}
 	return p.newExpressionStatement()
@@ -185,7 +185,7 @@ func (p *Parser) forLoop() (Statement, error) {
 	var init Statement
 	var err error
 
-	if p.match(SEMICOLON){
+	if p.match(SEMICOLON) {
 		init = nil
 	} else if p.match(VAR) {
 		init, err = p.varDecl()
@@ -198,9 +198,9 @@ func (p *Parser) forLoop() (Statement, error) {
 	}
 
 	var cond Exp
-    if !p.check(SEMICOLON) {
-      cond, err = p.expression()
-    }
+	if !p.check(SEMICOLON) {
+		cond, err = p.expression()
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -208,8 +208,8 @@ func (p *Parser) forLoop() (Statement, error) {
 
 	var increment Exp
 	if !p.check(RIGHT_PAREN) {
-      increment, err = p.expression()
-    }
+		increment, err = p.expression()
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -222,24 +222,24 @@ func (p *Parser) forLoop() (Statement, error) {
 
 	if increment != nil {
 		incrementStmt := NewExpressionStatement(increment)
-		body = &Block{[]Statement{body}, incrementStmt, true}
+		body = &Block{[]Statement{body}, incrementStmt}
 	}
 
 	if cond == nil {
 		cond = &LiteralExp{true}
 	}
 
-	body = &WhileStatement{cond,body}
+	body = &WhileStatement{cond, body}
 
 	if init != nil {
-		body = &Block{[]Statement{init, body}, nil, false}
+		body = &Block{[]Statement{init, body}, nil}
 	}
 
 	return body, nil
 }
 
 func (p *Parser) whileLoop() (Statement, error) {
-	_, err := p.consume(LEFT_PAREN,  "Expect '(' after 'while'.")
+	_, err := p.consume(LEFT_PAREN, "Expect '(' after 'while'.")
 	if err != nil {
 		return nil, err
 	}
@@ -248,8 +248,8 @@ func (p *Parser) whileLoop() (Statement, error) {
 	if err != nil {
 		return nil, err
 	}
-	
-	_, err = p.consume(RIGHT_PAREN,  "Expect ')' after while condition.")
+
+	_, err = p.consume(RIGHT_PAREN, "Expect ')' after while condition.")
 	if err != nil {
 		return nil, err
 	}
@@ -260,14 +260,14 @@ func (p *Parser) whileLoop() (Statement, error) {
 func (p *Parser) newBlock() (Statement, error) {
 	var statements []Statement
 	for !p.check(RIGHT_BRACE) && !p.isAtEnd() {
-		statement, err :=  p.declaration()
+		statement, err := p.declaration()
 		if err != nil {
 			return nil, err
 		}
 		statements = append(statements, statement)
 	}
-	_, err := p.consume(RIGHT_BRACE, "Expect '}' after block.");
-	return &Block{statements, nil,  false}, err
+	_, err := p.consume(RIGHT_BRACE, "Expect '}' after block.")
+	return &Block{statements, nil}, err
 }
 
 func (p *Parser) newExpressionStatement() (Statement, error) {
@@ -285,7 +285,7 @@ func (p *Parser) equality() (Exp, error) {
 		return nil, err
 	}
 
-	for p.match(BANG_EQUAL, EQUAL_EQUAL){
+	for p.match(BANG_EQUAL, EQUAL_EQUAL) {
 		op := p.previous()
 		right, err := p.comparison()
 		if err != nil {
@@ -335,7 +335,7 @@ func (p *Parser) comparison() (Exp, error) {
 	return expr, nil
 }
 
-func (p *Parser) term() (Exp, error){
+func (p *Parser) term() (Exp, error) {
 	expr, err := p.factor()
 	if err != nil {
 		return nil, err
@@ -397,7 +397,7 @@ func (p *Parser) and() (Exp, error) {
 }
 
 func (p *Parser) unary() (Exp, error) {
-	if p.match(BANG,MINUS) {
+	if p.match(BANG, MINUS) {
 		op := p.previous()
 		right, err := p.unary()
 		if err != nil {
@@ -454,10 +454,10 @@ func (p *Parser) primary() (Exp, error) {
 	if p.match(TRUE) {
 		return &LiteralExp{true}, nil
 	}
-	if p.match(NIL){
+	if p.match(NIL) {
 		return &LiteralExp{nil}, nil
 	}
-	if p.match(NUMBER,STRING) {
+	if p.match(NUMBER, STRING) {
 		return &LiteralExp{p.previous().Literal}, nil
 	}
 	if p.match(LEFT_PAREN) {
@@ -499,7 +499,7 @@ func (p *Parser) peek() Token {
 }
 
 func (p *Parser) previous() Token {
-	return p.tokens[p.current - 1]
+	return p.tokens[p.current-1]
 }
 
 func (p *Parser) advance() Token {
@@ -520,8 +520,7 @@ func (p *Parser) consume(tokenType Keyword, msg string) (Token, error) {
 	return p.peek(), raiseError(p.peek(), msg) // ?
 }
 
-
 func raiseError(token Token, msg string) error {
 	msg = fmt.Sprintf("%v : %v", token.Lexeme, msg)
-	return &SyntaxError{token.Line, msg}	
+	return &SyntaxError{token.Line, msg}
 }

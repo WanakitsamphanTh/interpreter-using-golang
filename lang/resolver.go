@@ -28,6 +28,9 @@ func (s *ScopeStack) push(scope map[string]bool) {
 
 func (s *ScopeStack) pop() map[string]bool {
 	index := len(s.elements) - 1
+	if index == -1 {
+		return nil
+	}
 	final := s.elements[index]
 	s.elements = s.elements[:index]
 	return final
@@ -77,7 +80,7 @@ func define(name string) error {
 }
 
 func resolveLocal(expr Exp, name string) error {
-	for i := scopes.size() - 1; i >= 0; i++ {
+	for i := scopes.size() - 1; i >= 0; i-- {
 		_, ok := scopes.get(i)[name]
 		if ok {
 			return resolveDepth(expr, scopes.size()-1-i)
@@ -92,6 +95,20 @@ func resolveDepth(expr Exp, depth int) error {
 }
 
 func (block *Block) Resolve() error {
+	beginScope()
+	defer endScope()
+	for _, stmt := range block.statements {
+		err := stmt.Resolve()
+		if err != nil {
+			return err
+		}
+	}
+	if block.defering != nil {
+		err := block.defering.Resolve()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -133,9 +150,12 @@ func (expr *LogicalExpression) Resolve() error {
 
 func (v *Variable) Resolve() error {
 	if !scopes.isEmpty() {
-		scopes, _ := scopes.peek()
-		if scopes[v.name.Lexeme] == false {
-			return &SyntaxError{v.name.Line, "Can't read local variable in its own initializer."}
+		scope, _ := scopes.peek()
+		declared, ok := scope[v.name.Lexeme]
+		if ok {
+			if declared == false {
+				return &SyntaxError{v.name.Line, v.name.Lexeme + ": Can't read local variable in its own initializer."}
+			}
 		}
 	}
 	resolveLocal(v, v.name.Lexeme)
@@ -147,7 +167,7 @@ func (v *Assignment) Resolve() error {
 	if err != nil {
 		return err
 	}
-	err = v.Resolve()
+	err = resolveLocal(v, v.name.Lexeme)
 	return err
 }
 
@@ -189,6 +209,10 @@ func resolveFunction(f *FnDecl) error {
 		if err != nil {
 			return err
 		}
+	}
+	err := f.body.Resolve()
+	if err != nil {
+		return err
 	}
 	return nil
 }

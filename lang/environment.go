@@ -67,7 +67,7 @@ func (e *Environment) ancestor(distance int) *Environment {
 
 func LookUpVariable(name string, expr Exp) any {
 	distance, ok := locals[expr]
-	if !ok {
+	if ok {
 		return current_env.GetAt(distance, name)
 	} else {
 		return global.GetValue(name)
@@ -92,5 +92,5 @@ func RetractEnvironment() (*Environment, error) {
 }
 
 func (e *Environment) assignAt(distance int, name string, val any) error {
-	return current_env.ancestor(distance).Assign(name, val)
+	return e.ancestor(distance).Assign(name, val)
 }

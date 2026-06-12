@@ -10,7 +10,7 @@ type Callable interface {
 // Function struct
 
 type Function struct {
-	decl *FnDecl
+	decl    *FnDecl
 	closure *Environment
 }
 
@@ -23,7 +23,7 @@ func (f *Function) call(params []any) (any, disruptive) {
 	//defer RetractEnvironment()
 	prev := current_env
 	current_env = NewEnvironment(f.closure, true)
-	defer func(){ 
+	defer func() {
 		current_env = prev
 	}()
 
@@ -31,10 +31,9 @@ func (f *Function) call(params []any) (any, disruptive) {
 		current_env.Define(param.Lexeme, params[i])
 	}
 
-	f.decl.body.shared = true
 	err := f.decl.body.Execute()
 	if err != nil {
-		switch disruption := err.(type){
+		switch disruption := err.(type) {
 		case *Return:
 			if disruption.val != nil {
 				return disruption.val.Eval(), nil
@@ -51,21 +50,21 @@ func (f *Function) call(params []any) (any, disruptive) {
 // FnDecl struct
 
 type FnDecl struct {
-	name Token
+	name   Token
 	params []Token
-	body *Block
+	body   *Block
 }
 
 func (fn *FnDecl) Execute() disruptive {
 	current_env.Define(fn.name.Lexeme, &Function{fn, current_env})
-	return nil	
+	return nil
 }
 
 // FnCall struct
 
 type FnCall struct {
 	callee Exp
-	paren Token // to report where error occurs
+	paren  Token // to report where error occurs
 	params []Exp
 }
 
@@ -95,7 +94,7 @@ func (fn *FnCall) Eval() any {
 // Return struct
 type Return struct {
 	keyword Token
-	val Exp
+	val     Exp
 }
 
 func (r *Return) Execute() disruptive {
@@ -105,7 +104,7 @@ func (r *Return) Execute() disruptive {
 // Native functions
 type NativeFn struct {
 	_arity int
-	_fn func([]any) (any, disruptive)
+	_fn    func([]any) (any, disruptive)
 }
 
 func (fn *NativeFn) arity() int {
@@ -115,4 +114,3 @@ func (fn *NativeFn) arity() int {
 func (fn *NativeFn) call(params []any) (any, disruptive) {
 	return fn._fn(params)
 }
-

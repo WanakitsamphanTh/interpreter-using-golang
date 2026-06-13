@@ -1,20 +1,42 @@
 var x = 0;
 
-while(x < 10){
-    var y = 0;
-    while(y < x){
-        printLn("x = ", x," y = ",y);
-        y = y + 1;
-    }
-    printLn("x = ", x);
-    x = x + 1;
+fun factorial(x){
+    if(x == 0) return 1;
+    return x * factorial(x - 1);
 }
 
-for(var i = 0; i < 10; i = i + 1){
-    for(var j = 0; j < 10; j = j + 1){
-        printLn("i = ", i, "j = ", j);
+fun factorial_with_for_loop(x){
+    if(x == 0) return 1;
+
+    var y = 1;
+    for(var i = 1; i < x; i = i + 1){
+        y = y * i;
     }
-    printLn("i = ", i);
+
+    return y;
 }
 
-printLn("After error, shouldn't be executed");
+fun factorial_with_while_loop(x){
+    if(x == 0) return 1;
+
+    var y = 1;
+    var i = 1;
+    while(i < x) {
+        y = y * i;
+        i = i + 1;
+    }
+
+    return y;
+}
+
+printLn(factorial(0));
+printLn(factorial(4));
+printLn(factorial(5));
+
+printLn(factorial_with_for_loop(0));
+printLn(factorial_with_for_loop(4));
+printLn(factorial_with_for_loop(5));
+
+printLn(factorial_with_while_loop(0));
+printLn(factorial_with_while_loop(4));
+printLn(factorial_with_while_loop(5));

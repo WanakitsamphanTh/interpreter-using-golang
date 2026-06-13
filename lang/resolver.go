@@ -113,12 +113,6 @@ func (block *Block) Resolve() error {
 			return err
 		}
 	}
-	if block.defering != nil {
-		err := block.defering.Resolve()
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -295,6 +289,7 @@ func (v *Return) Resolve() error {
 	return nil
 }
 
+/*
 func (v *WhileStatement) Resolve() error {
 	err := v.condition.Resolve()
 	if err != nil {
@@ -306,11 +301,47 @@ func (v *WhileStatement) Resolve() error {
 	}
 	return nil
 }
+*/
+
+func (v *WhileStatement) Resolve() error {
+	err := v.condition.Resolve()
+	if err != nil {
+		return err
+	}
+	return ResolveLoop(v)
+}
+
+var isLoop bool = false
+
+func ResolveLoop(v *WhileStatement) error {
+	enclosingLoop := isLoop
+	isLoop = true
+	defer func() {
+		isLoop = enclosingLoop
+	}()
+	err := v.body.Resolve()
+	if err != nil {
+		return err
+	}
+	if v.increment != nil {
+		err := v.increment.Resolve()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func (v *SkipStmt) Resolve() error {
+	if !isLoop {
+		return &SyntaxError{v.keyword.Line, "skip statement outside of a loop"}
+	}
 	return nil
 }
 
 func (v *BreakStmt) Resolve() error {
+	if !isLoop {
+		return &SyntaxError{v.keyword.Line, "break statement outside of a loop"}
+	}
 	return nil
 }

@@ -41,11 +41,8 @@ func (f *Function) call(params []any) (any, disruptive) {
 	err := f.decl.body.Execute()
 	if err != nil {
 		switch disruption := err.(type) {
-		case *Return:
-			if disruption.val != nil {
-				return disruption.val.Eval(), nil
-			}
-			return nil, nil
+		case *ReturnResult:
+			return disruption.val, nil
 		default:
 			return nil, err
 		}
@@ -104,8 +101,15 @@ type Return struct {
 	val     Exp
 }
 
+type ReturnResult struct {
+	val any
+}
+
 func (r *Return) Execute() disruptive {
-	return r
+	if r.val != nil {
+		return &ReturnResult{r.val.Eval()}
+	}
+	return &ReturnResult{nil}
 }
 
 // Native functions

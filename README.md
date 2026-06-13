@@ -13,6 +13,8 @@ I'm currently studying formal languages and decided to build an interpreter for 
 - implemented closure
 - Implemented return statement
 - Implemented break & skip statement
+- Implemented statement resolution
+- Implemented syntax error (return outside function, break/skip outside loop)
 - Implementing syntax & runtime error
 
 ## Expression Grammar
@@ -54,6 +56,7 @@ I'm currently studying formal languages and decided to build an interpreter for 
 ## Key differences
 - While the tutorial implements interpreter with Visitor pattern, which means statement executions and expression evaluations are done via visitor objects, expression objects implement Exp(ression) interface with Eval() and statement objects implement Statement interface with Execute().
 - While the tutorial treats environment objects (which store its own variable-value hashmap) as a field within the interpreter object, the environment objects in my interpreter are represented by a global variable.
+- No resolver object as in the turotial. Statements and expressions are Resolveable, which contain function `Resolve() error`.
 - The tutorial implements the return statement by runtimeException subclassing and throw/catch statement. This is not possible in Golang, hence I took an alternative Golang-native approach. Semantically, I did'nt want break, continue, and return statement to implement the error interface. I alised `any` type to `disruptive` with error and such statements as intended underlying types. An error propogates to the outermost scope, a return to the nearest function node, and a break/skip to the nearest loop node.
 
 *Should you have any suggestions, please feel free to reach me*

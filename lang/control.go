@@ -1,7 +1,7 @@
 package lang
 
 type IfStatement struct {
-	condition Exp
+	condition  Exp
 	thenBranch Statement
 	elseBranch Statement
 }
@@ -19,7 +19,8 @@ func (s *IfStatement) Execute() disruptive {
 
 type WhileStatement struct {
 	condition Exp
-	body Statement
+	body      Statement
+	increment Statement
 }
 
 func (s *WhileStatement) Execute() disruptive {
@@ -30,9 +31,21 @@ func (s *WhileStatement) Execute() disruptive {
 			case *BreakStmt:
 				return nil
 			case *SkipStmt:
+				if s.increment != nil {
+					err := s.increment.Execute()
+					if err != nil {
+						return err
+					}
+				}
 				continue
 			default:
 				return disruption
+			}
+		}
+		if s.increment != nil {
+			err := s.increment.Execute()
+			if err != nil {
+				return err
 			}
 		}
 	}

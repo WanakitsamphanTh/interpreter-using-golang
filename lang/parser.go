@@ -220,19 +220,20 @@ func (p *Parser) forLoop() (Statement, error) {
 		return nil, err
 	}
 
+	var incrementStmt Statement
 	if increment != nil {
-		incrementStmt := NewExpressionStatement(increment)
-		body = &Block{[]Statement{body}, incrementStmt}
+		incrementStmt = NewExpressionStatement(increment)
+		body = &Block{[]Statement{body}}
 	}
 
 	if cond == nil {
 		cond = &LiteralExp{true}
 	}
 
-	body = &WhileStatement{cond, body}
+	body = &WhileStatement{cond, body, incrementStmt}
 
 	if init != nil {
-		body = &Block{[]Statement{init, body}, nil}
+		body = &Block{[]Statement{init, body}}
 	}
 
 	return body, nil
@@ -254,7 +255,7 @@ func (p *Parser) whileLoop() (Statement, error) {
 		return nil, err
 	}
 	body, err := p.statement()
-	return &WhileStatement{cond, body}, err
+	return &WhileStatement{cond, body, nil}, err
 }
 
 func (p *Parser) newBlock() (Statement, error) {
@@ -267,7 +268,7 @@ func (p *Parser) newBlock() (Statement, error) {
 		statements = append(statements, statement)
 	}
 	_, err := p.consume(RIGHT_BRACE, "Expect '}' after block.")
-	return &Block{statements, nil}, err
+	return &Block{statements}, err
 }
 
 func (p *Parser) newExpressionStatement() (Statement, error) {

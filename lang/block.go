@@ -2,7 +2,6 @@ package lang
 
 type Block struct {
 	statements []Statement
-	defering   Statement
 }
 
 func (b *Block) Execute() disruptive {
@@ -11,11 +10,6 @@ func (b *Block) Execute() disruptive {
 
 	NewNestedEnvironment(false)
 	defer func() {
-		if b.defering != nil {
-			err = b.defering.Execute()
-		} else {
-			err = nil
-		}
 		RetractEnvironment()
 	}()
 

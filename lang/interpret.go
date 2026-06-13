@@ -74,7 +74,6 @@ func RunREPL() error {
 		fmt.Println("Input: ", input)
 		err := run(input)
 		if err != nil {
-			err := err.(error)
 			fmt.Println("Error:", err.Error())
 		}
 	}

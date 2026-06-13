@@ -80,7 +80,7 @@ func (fn *FnCall) Eval() any {
 		panic(msg)
 	}
 	if callable.arity() != -1 && len(params) != callable.arity() {
-		msg := fmt.Sprintf("At line %v, expected %v parameters but got %v", fn.paren.Line, callable.arity, len(params))
+		msg := fmt.Sprintf("At line %v, expected %v parameters but got %v", fn.paren.Line, callable.arity(), len(params))
 		panic(msg)
 	}
 	ret_val, err := callable.call(params)

@@ -33,6 +33,7 @@ type BinaryExp struct {
 func (b BinaryExp) Eval() any {
 	left := b.Left.Eval()
 	right := b.Right.Eval()
+
 	switch b.Op.Type {
 	case PLUS:
 		switch l := left.(type) {

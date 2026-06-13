@@ -55,7 +55,7 @@ func endScope() {
 	scopes.pop()
 }
 
-func declare(name string) error {
+func declare(name Token) error {
 	if scopes.isEmpty() {
 		return nil
 	}
@@ -63,7 +63,15 @@ func declare(name string) error {
 	if err != nil {
 		return err
 	}
-	scope[name] = false
+
+	_, ok := scope[name.Lexeme]
+
+	if ok {
+		msg := fmt.Sprintf("Name %s already exists in this scope.", name.Lexeme)
+		return &SyntaxError{name.Line, msg}
+	}
+
+	scope[name.Lexeme] = false
 	return nil
 }
 
@@ -91,6 +99,7 @@ func resolveLocal(expr Exp, name string) error {
 
 func resolveDepth(expr Exp, depth int) error {
 	locals[expr] = depth
+	fmt.Printf("Resolved %v %p -> depth %d\n", expr, expr, depth)
 	return nil
 }
 
@@ -158,7 +167,10 @@ func (v *Variable) Resolve() error {
 			}
 		}
 	}
-	resolveLocal(v, v.name.Lexeme)
+	err := resolveLocal(v, v.name.Lexeme)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -167,8 +179,13 @@ func (v *Assignment) Resolve() error {
 	if err != nil {
 		return err
 	}
+
 	err = resolveLocal(v, v.name.Lexeme)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (e *ExpressionStatement) Resolve() error {
@@ -190,9 +207,18 @@ func (f *FnCall) Resolve() error {
 }
 
 func (f *FnDecl) Resolve() error {
-	declare(f.name.Lexeme)
-	define(f.name.Lexeme)
-	resolveFunction(f)
+	err := declare(f.name)
+	if err != nil {
+		return err
+	}
+	err = define(f.name.Lexeme)
+	if err != nil {
+		return err
+	}
+	err = resolveFunction(f)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -201,7 +227,7 @@ func resolveFunction(f *FnDecl) error {
 	beginScope()
 	defer endScope()
 	for _, param := range f.params {
-		err := declare(param.Lexeme)
+		err := declare(param)
 		if err != nil {
 			return err
 		}
@@ -236,14 +262,20 @@ func (f *IfStatement) Resolve() error {
 }
 
 func (v *Var) Resolve() error {
-	declare(v.name.Lexeme)
+	err := declare(v.name)
+	if err != nil {
+		return err
+	}
 	if v.init != nil {
 		err := v.init.Resolve()
 		if err != nil {
 			return err
 		}
 	}
-	define(v.name.Lexeme)
+	err = define(v.name.Lexeme)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

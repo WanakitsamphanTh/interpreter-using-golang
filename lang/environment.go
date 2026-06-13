@@ -50,6 +50,7 @@ func (e *Environment) GetValue(name string) any {
 		}
 		panic("Undefined variable " + name)
 	}
+	//fmt.Printf("Getting variable %v from %p\n", name, e)
 	return val
 }
 
@@ -67,9 +68,16 @@ func (e *Environment) ancestor(distance int) *Environment {
 
 func LookUpVariable(name string, expr Exp) any {
 	distance, ok := locals[expr]
+
+	/*fmt.Printf(
+		"Lookup %s, expr=%v @%p, found=%v, depth=%d\n",
+		name, expr, expr, ok, distance,
+	)*/
+
 	if ok {
 		return current_env.GetAt(distance, name)
 	} else {
+		//panic(fmt.Sprintf("unresolved variable %s", name))
 		return global.GetValue(name)
 	}
 }
@@ -80,6 +88,7 @@ var current_env *Environment = global
 func NewNestedEnvironment(functionBound bool) *Environment {
 	e := NewEnvironment(current_env, functionBound)
 	current_env = e
+	//fmt.Println("current env = ", e)
 	return current_env
 }
 
@@ -88,9 +97,25 @@ func RetractEnvironment() (*Environment, error) {
 		return nil, fmt.Errorf("The current environment is the global environment.")
 	}
 	current_env = current_env.enclosing
+	//fmt.Printf("Retracted to %p\n", current_env)
 	return current_env, nil
 }
 
+/*
 func (e *Environment) assignAt(distance int, name string, val any) error {
-	return e.ancestor(distance).Assign(name, val)
+	//return e.ancestor(distance).Assign(name, val)
+	e.ancestor(distance).values[name] = val
+	return nil
+}
+*/
+func (e *Environment) assignAt(distance int, name string, val any) error {
+	env := e.ancestor(distance)
+
+	_, ok := env.values[name]
+	if !ok {
+		return fmt.Errorf("%s : Undefined variable", name)
+	}
+
+	env.values[name] = val
+	return nil
 }

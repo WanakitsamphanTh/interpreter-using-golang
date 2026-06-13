@@ -34,7 +34,8 @@ func (a *Assignment) Eval() any {
 	val := a.val.Eval()
 
 	distance, ok := locals[a]
-	if !ok {
+	//fmt.Printf("Assignment %p : distance = %v foudn = %v\n", a, distance, ok)
+	if ok {
 		err := current_env.assignAt(distance, a.name.Lexeme, val)
 		if err != nil {
 			panic(err.Error())

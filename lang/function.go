@@ -2,6 +2,13 @@ package lang
 
 import "fmt"
 
+type FunctionType int
+
+const (
+	NONE = iota
+	FUNCTION
+)
+
 type Callable interface {
 	call(params []any) (any, disruptive)
 	arity() int

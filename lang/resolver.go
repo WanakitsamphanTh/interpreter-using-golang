@@ -46,6 +46,7 @@ func (s *ScopeStack) peek() (map[string]bool, error) {
 
 var scopes ScopeStack = ScopeStack{}
 var locals map[Exp]int = make(map[Exp]int)
+var currentFn FunctionType = NONE
 
 func beginScope() {
 	scopes.push(make(map[string]bool))
@@ -99,7 +100,7 @@ func resolveLocal(expr Exp, name string) error {
 
 func resolveDepth(expr Exp, depth int) error {
 	locals[expr] = depth
-	fmt.Printf("Resolved %v %p -> depth %d\n", expr, expr, depth)
+	//fmt.Printf("Resolved %v %p -> depth %d\n", expr, expr, depth)
 	return nil
 }
 
@@ -215,17 +216,21 @@ func (f *FnDecl) Resolve() error {
 	if err != nil {
 		return err
 	}
-	err = resolveFunction(f)
+	err = resolveFunction(f, FUNCTION)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// ??????????????
-func resolveFunction(f *FnDecl) error {
+func resolveFunction(f *FnDecl, fnType FunctionType) error {
+	enclosingFn := currentFn
+	currentFn = fnType
 	beginScope()
-	defer endScope()
+	defer func() {
+		endScope()
+		currentFn = enclosingFn
+	}()
 	for _, param := range f.params {
 		err := declare(param)
 		if err != nil {
@@ -280,6 +285,9 @@ func (v *Var) Resolve() error {
 }
 
 func (v *Return) Resolve() error {
+	if currentFn == NONE {
+		return &SyntaxError{v.keyword.Line, "Return outside of a scope."}
+	}
 	if v.val != nil {
 		err := v.val.Resolve()
 		return err

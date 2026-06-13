@@ -16,3 +16,5 @@ for(var i = 0; i < 10; i = i + 1){
     }
     printLn("i = ", i);
 }
+
+printLn("After error, shouldn't be executed");
